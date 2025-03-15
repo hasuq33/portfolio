@@ -1,0 +1,6 @@
+@import "tailwindcss";
+
+
+.header-light {
+    @apply flex w-full px-20 py-3 justify-between bg-white/10 inset-shadow-2xs border-b-2 border-gray-300  bg-clip-padding backdrop-blur-sm;
+}
