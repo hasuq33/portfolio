@@ -33,7 +33,7 @@ const Header = () => {
             <li className=""><Link href="/blogs">Blogs</Link></li>
             <li className=""><Link href="/projects">Projects</Link></li>
         </ul>
-        <Link className="text-white bg-black rounded px-2 py-1 border transition-all duration-[1s] border-black hover:bg-white hover:text-black" href="/web/login">Login</Link>
+        <Link className="header-light-login" href="/web/login">Login</Link>
         </div>
       </nav>
     </header>

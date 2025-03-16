@@ -4,3 +4,7 @@
 .header-light {
     @apply flex w-full px-20 py-3 justify-between bg-white/10 inset-shadow-2xs border-b-2 border-gray-300  bg-clip-padding backdrop-blur-sm;
 }
+
+.header-light-login{
+    @apply text-white bg-black rounded px-2 py-1 border transition-all duration-[500ms] border-black hover:bg-white hover:text-black;
+}
