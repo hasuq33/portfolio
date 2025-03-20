@@ -1,12 +1,13 @@
 "use client";
 import Link from "next/link";
 import { useEffect , useState } from "react";
+import {ThemeToggler} from "@/components/ThemeToggler";
 
 const Header = () => {
   const [scrolled , setScrolled] = useState(false);
   useEffect(()=>{
     const handleScroll = () =>{
-      if(window.scrollY > 170){
+      if(window.scrollY > 130){
         setScrolled(true);
       }else{
         setScrolled(false);
@@ -19,12 +20,12 @@ const Header = () => {
     }
   },[])
   return (
-    <header className={`transition-all duration-[2s] ${
-      scrolled ? "fixed top-0 left-0 right-0 bg-white shadow-md" : ""
+    <header className={`transition-all duration-[1s] ${
+      scrolled ? "fixed top-0 left-0 right-0 shadow-md shadow-gray-400/30 dark:shadow-md dark:shadow-black backdrop-blur-md" : ""
     }`} >
       <nav className="header-light ">
         <div>
-          <Link href="/">Harshiv</Link>
+          <Link className="text-2xl" href="/">{`<HARSHIV/>`}</Link>
         </div>
         <div className="flex flex-row gap-x-10 items-center">
         <ul className="flex flex-row list-none gap-x-[2rem]">
@@ -34,6 +35,7 @@ const Header = () => {
             <li className=""><Link href="/projects">Projects</Link></li>
         </ul>
         <Link className="header-light-login" href="/web/login">Login</Link>
+        <ThemeToggler />
         </div>
       </nav>
     </header>

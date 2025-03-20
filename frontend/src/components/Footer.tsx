@@ -6,11 +6,11 @@ import Link from "next/link";
 
 const Footer = () => {
   return (
-    <footer className='bottom-0 bg-gray-200 border-t-2 border-gray-300 left-0 right-0 w-full p-3'>
+    <footer className='bottom-0 border-t-2  left-0 right-0 w-full p-3'>
         <div className="flex flex-row justify-around items-center">
           <span>©️Harshiv Joshi</span>
           <span><a href='mailto:harshivjoshi1234@gmail.com' className='hover:underline'>harshivjoshi1234@gmail.com</a></span>
-          <div className='flex flex-row gap-2 text-2xl'>
+          <div className='flex flex-row gap-2 text-2xl items-center'>
             <Link href="mailto:harshivjoshi1234@gmail.com"><BiLogoGmail/></Link>
             <Link href="https://www.instagram.com/jharshiv/" target='_blank'><FaInstagram /></Link>
             <Link href="https://www.linkedin.com/in/harshiv-joshi-518357234/" target='_blank'><BiLogoLinkedin /></Link>
