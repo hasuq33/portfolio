@@ -2,12 +2,16 @@
 @import "tw-animate-css";
 @custom-variant dark (&:where(.dark, .dark *));
 
+html, body, #root {
+    height: 100vh;
+  }
+
 .header-light {
-    @apply flex w-full px-20 py-3 justify-between  inset-shadow-2xs   bg-clip-padding backdrop-blur-sm  ;
+    @apply flex justify-between items-center px-10 py-4 md:px-20  ;
 }
 
 .header-light-login{
-    @apply text-white dark:text-black dark:bg-white dark:border-white bg-black rounded px-2 py-1 border transition-all duration-[500ms] border-black hover:bg-white hover:text-black dark:hover:text-white dark:hover:bg-black;
+    @apply text-white dark:text-black dark:bg-white dark:border-white bg-black rounded px-2 py-1 border transition-all duration-[500ms] border-black hover:bg-white hover:text-black dark:hover:text-white dark:hover:bg-transparent;
 }
 
 :root {
@@ -223,4 +227,21 @@
   body {
     @apply bg-background text-foreground;
     }
+}
+
+
+.theme_dropdown_item{
+  @apply hover:bg-gray-200 dark:hover:bg-gray-700 transition-all rounded-md px-4 py-2 cursor-pointer;
+}
+
+.theme_dropwdown_content{
+  @apply dark:bg-gray-900/80 bg-white/80 backdrop-blur-lg border border-gray-200 dark:border-gray-700 shadow-lg rounded-lg;
+}
+
+.theme_link_style{
+  @apply hover:text-blue-600 dark:hover:text-blue-400 transition;
+}
+
+.header_absolute_span{
+  @apply absolute w-0 h-[2px] bg-blue-600 dark:bg-blue-400 left-0 bottom-[-2px] transition-all group-hover:w-full;
 }
