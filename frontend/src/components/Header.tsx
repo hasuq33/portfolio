@@ -16,7 +16,7 @@ const Header = () => {
     }
   }, [])
   return (
-    <header className={`w-[100%] z-50 fixed transition-all duration-[1s] ${scrolled ? "fixed top-0 left-0 right-0 shadow-lg bg-white/60 dark:bg-gray-900/80 backdrop-blur-lg border-b border-gray-200 dark:border-gray-700" : "dark:bg-gray-900/80"
+    <header className={`w-[100%] z-50 fixed transition-all duration-[1s] ${scrolled ? "fixed top-0 left-0 right-0 shadow-lg bg-white/60 dark:bg-gray-900/80 backdrop-blur-lg border-b border-gray-200 dark:border-gray-700" : "bg-transparent"
       }`} >
       <nav className="header-light ">
         <div>
