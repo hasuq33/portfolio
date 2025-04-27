@@ -1,9 +1,13 @@
 @import "tailwindcss";
 @import "tw-animate-css";
 @custom-variant dark (&:where(.dark, .dark *));
+@theme{
+  --color-black:#171717;
+}
 
-html, body, #root {
+html, #root {
     height: 100vh;
+    font-family: var(--font-poppins);
   }
 
 .header-light {

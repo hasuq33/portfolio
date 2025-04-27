@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+
 
 export const generateMetadata = async () =>{
   return {

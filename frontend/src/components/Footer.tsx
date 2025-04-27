@@ -22,16 +22,16 @@ const Footer = () => {
 
         {/* Social Icons */}
         <div className="flex gap-4 text-2xl">
-          <Link href="mailto:harshivjoshi1234@gmail.com" className="hover:text-red-600 transform hover:scale-110 transition-all duration-300">
+          <Link href="mailto:harshivjoshi1234@gmail.com" aria-label='Contact Me Through Gmial' className="hover:text-red-600 transform hover:scale-110 transition-all duration-300">
             <BiLogoGmail />
           </Link>
-          <Link href="https://www.instagram.com/jharshiv/" target="_blank" className="hover:text-pink-500 transform hover:scale-110 transition-all duration-300">
+          <Link href="https://www.instagram.com/jharshiv/" aria-label='Contact Me on Instagram' target="_blank" className="hover:text-pink-500 transform hover:scale-110 transition-all duration-300">
             <FaInstagram />
           </Link>
-          <Link href="https://www.linkedin.com/in/harshiv-joshi-518357234/" target="_blank" className="hover:text-blue-600 transform hover:scale-110 transition-all duration-300">
+          <Link href="https://www.linkedin.com/in/harshiv-joshi-518357234/" aria-label='Contact Me on Linkdind' target="_blank" className="hover:text-blue-600 transform hover:scale-110 transition-all duration-300">
             <BiLogoLinkedin />
           </Link>
-          <Link href="https://x.com/HarshivJoshi1?s=08" target="_blank" className="hover:text-gray-700 dark:hover:text-white transform hover:scale-110 transition-all duration-300">
+          <Link href="https://x.com/HarshivJoshi1?s=08" target="_blank" aria-label='Contact Me on X' className="hover:text-gray-700 dark:hover:text-white transform hover:scale-110 transition-all duration-300">
             <BsTwitterX />
           </Link>
         </div>

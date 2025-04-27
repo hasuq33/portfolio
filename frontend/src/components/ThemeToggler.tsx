@@ -12,10 +12,11 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 
-export function ThemeToggler() {
+export function ThemeToggler({propsClass}:{propsClass:string}) {
   const { setTheme } = useTheme();
 
   return (
+    <div className={`${propsClass}`}>
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <Button
@@ -52,5 +53,6 @@ export function ThemeToggler() {
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
+    </div>
   );
 }

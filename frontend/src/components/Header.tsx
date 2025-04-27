@@ -2,7 +2,7 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { ThemeToggler } from "@/components/ThemeToggler";
-
+import { MobileHeadar } from "@/components/HeadrMobile";
 const Header = () => {
   const [scrolled, setScrolled] = useState(false);
   useEffect(() => {
@@ -20,31 +20,32 @@ const Header = () => {
       }`} >
       <nav className="header-light ">
         <div>
-          <Link className="text-3xl font-bold tracking-wide transition-transform duration-300 hover:scale-110" href="/">{`<HARSHIV/>`}</Link>
+          <Link className="lg:text-3xl text-2xl font-bold tracking-wide transition-transform duration-300 hover:scale-110 font-sans" href="/">{`<HARSHIV/>`}</Link>
         </div>
         <div className="flex flex-row gap-x-10 items-center">
-          <ul className="flex flex-row list-none gap-x-[2rem]">
+          <ul className=" flex-row list-none gap-x-[2rem] hidden lg:flex">
             <li className="relative group">
               <Link href="/aboutus" className="theme_link_style">
                 About Us
               </Link>
-              <span className="header_absolute_span"/>
+              <span className="header_absolute_span" />
             </li>
             <li className="relative group">
-              <Link href="/contactus" className="theme_link_style">Contact US</Link>
-              <span className="header_absolute_span"/>
+              <Link href="/contactus" className="theme_link_style">Contact</Link>
+              <span className="header_absolute_span" />
             </li>
             <li className="relative group">
               <Link href="/blogs" className="theme_link_style">Blogs</Link>
-              <span className="header_absolute_span"/>
+              <span className="header_absolute_span" />
             </li>
             <li className="relative group">
-              <Link href="/projects" className="theme_link_style">Projects</Link>
-              <span className="header_absolute_span"/>
+              <Link href="/projects" className="theme_link_style">Fun with 3D</Link>
+              <span className="header_absolute_span" />
             </li>
           </ul>
-          <Link className="header-light-login" href="/web/login">Login</Link>
-          <ThemeToggler />
+          <Link className="header-light-login hidden lg:flex" href="/web/login">Login</Link>
+          <MobileHeadar />
+          <ThemeToggler propsClass={`hidden lg:flex`} />
         </div>
       </nav>
     </header>

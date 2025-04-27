@@ -4,6 +4,7 @@ import "./globals.css";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { ThemeProvider } from "@/components/theme_provider";
+import NextTopLoader from 'nextjs-toploader';
 
 const poppins = Poppins({
   weight: ['400', '700'], 
@@ -23,8 +24,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className="dark" suppressHydrationWarning={true}>
-      <body>
+    <html lang="en" className={`dark ${poppins.variable}`} suppressHydrationWarning={true}>
+      <body >
         <ThemeProvider
             attribute="class"
             defaultTheme="light"
@@ -32,7 +33,8 @@ export default function RootLayout({
             disableTransitionOnChange
           >
           <Header />
-            <main>{children}</main>
+          <NextTopLoader />
+                <main className="">{children}</main>
           </ThemeProvider>
         <Footer />
       </body>
