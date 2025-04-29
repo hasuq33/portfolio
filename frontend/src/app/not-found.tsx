@@ -1,10 +1,12 @@
 'use client';
 
-import React from 'react'
+import ModelContainer from "@/components/ModelContainer";
 
 const NotFound = () => {
   return (
-    <div>NotFound</div>
+    <div className=''>
+       <ModelContainer />
+    </div>
   )
 }
 

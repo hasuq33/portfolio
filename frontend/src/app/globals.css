@@ -5,9 +5,11 @@
   --color-black:#171717;
 }
 
-html, #root {
+html,main ,  #root {
     height: 100vh;
     font-family: var(--font-poppins);
+
+    @apply dark:bg-gray-900 ;
   }
 
 .header-light {
