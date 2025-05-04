@@ -1,6 +1,7 @@
 import Image from "next/image";
 import { BiLogoGmail } from "react-icons/bi";
 import { FaLinkedin , FaGithub } from "react-icons/fa6";
+import { Skill } from "@/components/Skills";
 
 export default function Home() {
   return (
@@ -42,21 +43,10 @@ export default function Home() {
       </div>
       <section className="mt-4">
         <h2 className="text-3xl font-semibold text-gray-900 dark:text-white text-center">
-          My Skills
+          Skills & Languages
         </h2>
-        <div className="flex flex-wrap justify-center gap-6 mt-6">
-          <span className="px-4 py-2 bg-gray-200 dark:bg-gray-800 rounded-full text-gray-900 dark:text-white">
-            Odoo Development
-          </span>
-          <span className="px-4 py-2 bg-gray-200 dark:bg-gray-800 rounded-full text-gray-900 dark:text-white">
-            MERN Stack
-          </span>
-          <span className="px-4 py-2 bg-gray-200 dark:bg-gray-800 rounded-full text-gray-900 dark:text-white">
-            AI & TensorFlow
-          </span>
-          <span className="px-4 py-2 bg-gray-200 dark:bg-gray-800 rounded-full text-gray-900 dark:text-white">
-            ERP Solutions
-          </span>
+        <div className="">
+          <Skill/>
         </div>
       </section>
     </div>

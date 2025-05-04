@@ -6,7 +6,7 @@
 }
 
 html,main ,  #root {
-    height: 100vh;
+    min-height: 100vh;
     font-family: var(--font-poppins);
 
     @apply dark:bg-gray-900 ;
