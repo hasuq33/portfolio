@@ -2,6 +2,8 @@ import Image from "next/image";
 import { BiLogoGmail } from "react-icons/bi";
 import { FaLinkedin , FaGithub } from "react-icons/fa6";
 import { Skill } from "@/components/Skills";
+import Experience from "@/components/Experience";
+import FamousQuote from "@/components/FamousQuote";
 
 export default function Home() {
   return (
@@ -42,12 +44,22 @@ export default function Home() {
         </div>
       </div>
       <section className="mt-4">
-        <h2 className="text-3xl font-semibold text-gray-900 dark:text-white text-center">
+        <h2 className="text-xl md:text-2xl lg:text-3xl font-semibold text-gray-900 dark:text-white text-center">
           Skills & Languages
         </h2>
         <div className="">
           <Skill/>
         </div>
+      </section>
+      <section className="mt-4">
+        <div className="">
+          <Experience/>
+        </div>
+      </section>
+      <section className="my-4">
+          <div className="px-4 sm:px-6 lg:px-8">
+            <FamousQuote />
+          </div>
       </section>
     </div>
   );

@@ -10,7 +10,7 @@ const Header = () => {
       setScrolled(window.scrollY > 10);
     }
     window.addEventListener("scroll", handleScroll);
-
+    setScrolled(window.scrollY > 10);
     return () => {
       window.removeEventListener("scroll", handleScroll)
     }
@@ -24,12 +24,6 @@ const Header = () => {
         </div>
         <div className="flex flex-row gap-x-10 items-center">
           <ul className=" flex-row list-none gap-x-[2rem] hidden lg:flex">
-            <li className="relative group">
-              <Link href="/aboutus" className="theme_link_style">
-                About Us
-              </Link>
-              <span className="header_absolute_span" />
-            </li>
             <li className="relative group">
               <Link href="/contactus" className="theme_link_style">Contact</Link>
               <span className="header_absolute_span" />
