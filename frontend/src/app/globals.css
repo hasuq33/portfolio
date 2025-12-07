@@ -251,3 +251,7 @@ html,main ,  #root {
 .header_absolute_span{
   @apply absolute w-0 h-[2px] bg-blue-600 dark:bg-blue-400 left-0 bottom-[-2px] transition-all group-hover:w-full;
 }
+
+/* input:not(:placeholder-shown) ~ label {
+    @apply transform -translate-y-4 ;
+} */

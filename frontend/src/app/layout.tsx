@@ -58,7 +58,7 @@ export default function RootLayout({
             disableTransitionOnChange
           >
           <Header />
-          <NextTopLoader />
+          <NextTopLoader showSpinner={false} />
                 <main className="">{children}</main>
           </ThemeProvider>
         <Footer />
