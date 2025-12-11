@@ -1,7 +1,7 @@
 import { Prop , Schema , SchemaFactory } from '@nestjs/mongoose';
 import { Partner, PartnerSchema } from './partner.schema';
 
-@Schema()
+@Schema({timestamps:true,collection:'users'})
 export class User extends Partner{
     @Prop()
     password:string;

@@ -1,12 +1,21 @@
-import { Controller, Get, Post , Put , Delete , Param , Body , Query } from "@nestjs/common";
+import { Controller, Get, Post , Put , Delete , Param , Body , Query , Logger } from "@nestjs/common";
 import { CommonService } from "./common.service";
 
+// Common API Model Sharable which Can be Scallable by Model and Need to find the Data by accessrigght 
+/**
+ * I am gonna implement the Controller API as Like SmartMiddleare which use Groups 
+ * with authentication 
+ * 
+ * Web Request ---> Authentication middleware --> Check Group --> Fetch Data 
+ */
 @Controller('api/:model')
 export class CommonController{
     constructor(private readonly commonService:CommonService){}
+    private readonly logger = new Logger(CommonController.name);
 
     @Post()
     async create(@Param('model') model:string, @Body() data:any){
+        this.logger.log(`api/${model}`)
         return this.commonService.create(model, data);
     }
 
