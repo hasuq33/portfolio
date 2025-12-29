@@ -5,6 +5,7 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { ThemeProvider } from "@/components/theme_provider";
 import NextTopLoader from 'nextjs-toploader';
+import {  } from "next/navigation";
 
 const poppins = Poppins({
   weight: ['400', '700'], 
@@ -48,6 +49,8 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const noLayoutPath = ['/projects'];
+  // const route = useRouter();
   return (
     <html lang="en" className={`dark ${poppins.variable}`} suppressHydrationWarning={true}>
       <body >
@@ -60,8 +63,8 @@ export default function RootLayout({
           <Header />
           <NextTopLoader showSpinner={false} />
                 <main className="">{children}</main>
+          <Footer />
           </ThemeProvider>
-        <Footer />
       </body>
     </html>
   );

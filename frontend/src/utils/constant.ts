@@ -84,3 +84,46 @@ export const quotes = [
   },
 ];
 
+export const Blogs = [
+  { id:1,
+    name:"This is Out Technical Blogs",
+    date:"Dec 22,2025",
+    category:"Test Category"
+  },
+  { id:2,
+    name:"This is Out Technical Blogs",
+    date:"Dec 22,2025",
+    category:"Test Category"
+  },
+  { id:3,
+    name:"This is Out Technical Blogs",
+    date:"Dec 22,2025",
+    category:"Test Category"
+  },
+  { id:4,
+    name:"This is Out Technical Blogs",
+    date:"Dec 22,2025",
+    category:"Test Category"
+  },
+  { id:5,
+    name:"This is Out Technical Blogs",
+    date:"Dec 22,2025",
+    category:"Test Category"
+  },
+  { id:6,
+    name:"This is Out Technical Blogs",
+    date:"Dec 22,2025",
+    category:"Test Category"
+  },
+  { id:7,
+    name:"This is Out Technical Blogs",
+    date:"Dec 22,2025",
+    category:"Test Category"
+  },
+  { id:8,
+    name:"This is Out Technical Blogs",
+    date:"Dec 22,2025",
+    category:"Test Category"
+  }
+]
+

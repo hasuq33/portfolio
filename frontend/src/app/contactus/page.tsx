@@ -8,7 +8,7 @@ const Page = () => {
         </h1>
 
   <div className="
-      max-w-3xl mx-auto p-10 rounded-3xl shadow-xl 
+      max-w-3xl mx-auto p-10 rounded-3xl shadow-sm 
       bg-white/20 dark:bg-gray-800/20 
       backdrop-blur-2xl border border-white/40 dark:border-gray-700
     ">
