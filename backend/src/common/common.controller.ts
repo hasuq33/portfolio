@@ -1,5 +1,7 @@
 import { Controller, Get, Post , Put , Delete , Param , Body , Query , Logger } from "@nestjs/common";
 import { CommonService } from "./common.service";
+import { UseGuards } from "@nestjs/common";
+import { JwtAuthGuard } from "../auth/jwt-auth.guard";
 
 // Common API Model Sharable which Can be Scallable by Model and Need to find the Data by accessrigght 
 /**
@@ -8,6 +10,7 @@ import { CommonService } from "./common.service";
  * 
  * Web Request ---> Authentication middleware --> Check Group --> Fetch Data 
  */
+@UseGuards(JwtAuthGuard)
 @Controller('api/:model')
 export class CommonController{
     constructor(private readonly commonService:CommonService){}

@@ -6,11 +6,8 @@ export class User extends Partner{
     @Prop()
     password:string;
 
-    @Prop({unique:true})
+    @Prop({unique:true,required: true})
     login:string;
 }
 
 export const UserSchema =  SchemaFactory.createForClass(User);
-
-PartnerSchema.discriminator('User',UserSchema);
-

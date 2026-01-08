@@ -2,7 +2,7 @@ import { ContactForm } from "@/components/ContactForm";
 
 const Page = () => {
   return (
-    <div className="min-h-screen py-24 px-6 md:px-24 bg-gray-50 dark:bg-gray-900 transition">
+    <div className="form-format">
         <h1 className="text-center text-4xl font-bold mb-12 text-gray-800 dark:text-white">
           Contact <span className="text-blue-500">Me</span>
         </h1>
