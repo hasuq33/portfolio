@@ -1,0 +1,33 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+@custom-variant dark (&:where(.dark, .dark *));
+@theme{
+  --color-black:#171717;
+  --color-muted: hsl(0 0% 96.1%);
+  --color-muted-foreground: hsl(0 0% 45.1%);
+}
+
+html,main ,  #root {
+    min-height: 100vh;
+}
+
+@layer theme {
+  :root, :host {
+    @variant dark {
+      --color-muted: hsl(0 0% 14.9%);
+      --color-muted-foreground: hsl(0 0% 63.9%);
+    }
+  }
+}
+
+.dark{
+ background: radial-gradient(circle at top left, #1E293B, #0B1220 60%);
+}
+
+.theme_dropdown_item{
+  @apply hover:bg-gray-200 dark:hover:bg-gray-700 transition-all rounded-md px-4 py-2 cursor-pointer;
+}
+
+.theme_dropwdown_content{
+  @apply dark:bg-gray-900/80 bg-white/80 backdrop-blur-lg border border-gray-200 dark:border-gray-700 shadow-lg rounded-lg;
+}

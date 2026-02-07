@@ -77,7 +77,7 @@ export const ContactForm = () => {
           <label
             className="
               absolute left-1 scale-75 peer-placeholder-shown:scale-100 peer-focus:scale-75 -top-[0.8rem] px-2 origin-left peer-placeholder-shown:top-2 peer-focus:-top-[0.8rem] peer-focus:text-blue-500 text-body transition-all pointer-events-none 
-              dark:bg-gray-900 bg-white
+              dark:bg-gray-800/20 bg-white
             "
           >
             {field.label}
@@ -108,7 +108,7 @@ export const ContactForm = () => {
         <label
           className="
             absolute left-1 scale-75 peer-placeholder-shown:scale-100 peer-focus:scale-75 -top-[0.8rem] px-2 origin-left peer-placeholder-shown:top-2 peer-focus:-top-[0.8rem] peer-focus:text-blue-500 text-body transition-all pointer-events-none 
-              dark:bg-gray-900 bg-white
+              dark:bg-gray-800/20 bg-white
           "
         >
           Message

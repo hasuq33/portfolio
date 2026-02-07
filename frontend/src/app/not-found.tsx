@@ -1,12 +1,17 @@
 'use client';
 
 import ModelContainer from "@/components/ModelContainer";
+import '../app/(portal)/global.css'
 
 const NotFound = () => {
   return (
-    <div className=''>
-       <ModelContainer />
-    </div>
+    <html>
+      <body>
+        <div className=''>
+          <ModelContainer />
+        </div>
+      </body>
+    </html>
   )
 }
 

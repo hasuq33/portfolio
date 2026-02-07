@@ -3,7 +3,7 @@ import { HydratedDocument, Types } from 'mongoose';
 
 export type LeadDocument = HydratedDocument<Lead>;
 
-@Schema({ timestamps: true, collection: 'leads' })
+@Schema({ timestamps: true, collection: 'lead' })
 export class Lead {
   
   @Prop({ required: true, trim: true })
@@ -41,7 +41,7 @@ export class Lead {
   @Prop({ type: String })
   notes?: string;
 
-  @Prop({ type: Types.ObjectId, ref: 'User' })
+  @Prop({ type: Types.ObjectId, ref: 'user' })
   assignedTo?: Types.ObjectId;
 }
 
