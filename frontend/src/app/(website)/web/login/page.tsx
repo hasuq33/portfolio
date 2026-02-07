@@ -6,12 +6,11 @@ import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import React , { useState } from "react";
 import DOMPurify from "dompurify";
-import { useRouter } from "next/navigation";
 import { ImCross } from "react-icons/im";
+import { apiFetch } from "@/lib/orm_service";
 
 const page = () => {
   const [error, setError ] = useState<string>('');
-  const router =  useRouter();
   const sanitize = (value:string)=>{
     return DOMPurify.sanitize(value,{ ALLOWED_TAGS: [], ALLOWED_ATTR: [] });
   }
@@ -25,20 +24,19 @@ const page = () => {
         remember: formData.get("remember") === "on",
       }
       try {
-       const res = await fetch("http://localhost:8000/auth/login",{
+       const res = await apiFetch({url:"/auth/login",
           method:"POST",
-          credentials:"include",
           headers:{
              "Content-Type": "application/json",
           },
-          body:JSON.stringify(payload)
+          payload:JSON.stringify(payload)
         })
-        if(!res.ok){
+        if(!res?.ok){
             setError("Login Failed");
             return
         }
 
-        router.replace("/dashboard");
+        window.location.href = "/dashboard"
       } catch (error) {
         console.error(error);
       }

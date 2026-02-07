@@ -4,6 +4,7 @@ import { InjectModel } from "@nestjs/mongoose";
 import { Model } from "mongoose";
 import bcrypt from 'bcrypt';
 import { JwtService } from "@nestjs/jwt";
+import { retry } from "rxjs";
 
 @Injectable()
 export class AuthService{
@@ -57,5 +58,17 @@ export class AuthService{
         }
 
         return user;
+    }
+
+    async getCurrentUser(token:string){
+        try {
+           const payload =  this.jwtService.verify(token);
+            const { login } = payload;
+            if(!login) throw  new UnauthorizedException('Invalid User!'); 
+            const user = await this.userModel.findOne({login:login});
+            return user;
+        } catch (error) {
+            throw new UnauthorizedException('Invalid or expired token!');
+        }
     }
 }

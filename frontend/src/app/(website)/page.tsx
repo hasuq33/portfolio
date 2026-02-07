@@ -1,3 +1,35 @@
+import type { Metadata } from "next";
+export const metadata: Metadata = {
+  title: "Harshiv Joshi | Odoo Developer, MERN & Next.js Expert",
+  description:
+    "Harshiv Joshi is a Full Stack Developer specializing in Odoo ERP, OWL framework, and modern web technologies like React and Next.js. Currently working at BrowseInfo, building scalable ERP and web solutions. Passionate about AI, open-source, and creating impactful software.",
+  keywords: [
+    "Harshiv Joshi",
+    "Odoo Developer",
+    "Odoo Expert",
+    "OWL JS",
+    "OWL Framework Expert",
+    "React Developer",
+    "Next.js Developer",
+    "Full Stack Developer",
+    "MERN Stack",
+    "PostgreSQL",
+    "ERP Developer",
+    "Odoo ORM",
+    "Odoo Custom Module",
+    "Web Developer",
+    "Frontend Developer",
+    "Backend Developer",
+    "Odoo Website Developer",
+    "AI Enthusiast",
+    "Open Source Contributor",
+    "Software Engineer",
+    "Odoo 17",
+    "Odoo ERP Specialist"
+  ],
+};
+
+
 import Image from "next/image";
 import { BiLogoGmail } from "react-icons/bi";
 import { FaLinkedin , FaGithub } from "react-icons/fa6";

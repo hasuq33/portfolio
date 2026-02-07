@@ -23,6 +23,7 @@ const MONGODB_URI = process.env.MONGODB_URI as string
             }
         }),
         MongooseModule.forFeature([
+            {name:'User',schema: UserSchema},
             { name: 'Partner', schema: PartnerSchema },
             {name:'Lead',schema:LeadSchema},
             {name:'Tags',schema:TagsSchema},

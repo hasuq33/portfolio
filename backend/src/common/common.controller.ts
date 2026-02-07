@@ -1,4 +1,4 @@
-import { Controller, Get, Post , Put , Delete , Param , Body , Query , Logger } from "@nestjs/common";
+import { Controller, Post , Put , Delete , Param , Body , Logger } from "@nestjs/common";
 import { CommonService } from "./common.service";
 import { UseGuards } from "@nestjs/common";
 import { JwtAuthGuard } from "../auth/jwt-auth.guard";
@@ -22,14 +22,28 @@ export class CommonController{
         return this.commonService.create(model, data);
     }
 
-    @Get()
-    async findAll(@Param('model') model:string, @Query() query:any){
-        return this.commonService.findAll(model,query);
+    @Post("search")
+    async searchRead(
+        @Param("model") model:string,
+        @Body() body:{
+            domain?: [string, string, any][];
+            order?: string;
+            limit?: number;
+            offset?: number;
+            fields?: string[];
+        }
+    ){
+        this.logger.log(`SEARCH api/${model}`);
+        return this.commonService.searchRead(model,body);
     }
-    
-    @Get(':id')
-    async findOne(@Param('model') model: string, @Param('id') id: string) {
-        return this.commonService.findById(model, id);
+
+    @Post("read")
+    async read(
+        @Param("model") model:string,
+        @Body("id") id: string,
+    ){
+        this.logger.log(`UPDATE api/${model}/${id}`);
+        return this.commonService.findById(model,id);
     }
 
     @Put(':id')

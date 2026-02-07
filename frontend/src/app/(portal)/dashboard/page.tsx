@@ -1,5 +1,7 @@
 import { cookies } from 'next/headers';
 import { redirect } from "next/navigation";
+import AppsGrid from '@/components/web/AppGrid';
+import StatusBar from '@/components/web/StatusBar';
 
 export default async function DashboardPage() {
   const cookieStore = await cookies(); 
@@ -12,8 +14,8 @@ export default async function DashboardPage() {
 
   return (
     <div>
-      <h1>Dashboard</h1>
-      <p>Welcome to your portal</p>
+        <StatusBar />
+        <AppsGrid />
     </div>
   );
 }

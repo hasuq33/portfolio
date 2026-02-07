@@ -1,6 +1,6 @@
-import { Controller , Post , Body, Res, HttpCode, HttpStatus , Logger } from "@nestjs/common";
+import { Controller , Post , Body, Res, HttpCode, HttpStatus , Logger, Get, Req } from "@nestjs/common";
 import { AuthService } from "./auth.service";
-import type { Response } from "express";
+import type { Response , Request } from "express";
 
 @Controller('auth')
 export class AuthController{
@@ -23,7 +23,7 @@ export class AuthController{
             httpOnly: true,
             secure: false,
             sameSite: 'lax',
-            maxAge: 60 * 60 * 1000 ,
+            maxAge: Number(process.env.MAX_AGE)*60*1000 ,
             path:'/'
         });
         this.logger.log('/auth/login Susccessully called!')
@@ -41,5 +41,15 @@ export class AuthController{
     logout(@Res({passthrough:true}) res:Response){
         res.clearCookie('access_token');
         return {message: 'Logged out successfully'}
+    }
+
+    @Get('user')
+    @HttpCode(HttpStatus.OK)
+    async getuser(@Req() request:Request){
+        const allCookies =  request.cookies;
+        const { access_token } = allCookies
+        const user = await this.authService.getCurrentUser(access_token);
+        console.log(user)
+        return user; 
     }
 }

@@ -6,6 +6,7 @@ import { AuthService } from "./auth.service";
 import { AuthController } from "./auth.controller";
 import { User, UserSchema } from "../schemas/user.schema";
 import { JwtAuthGuard } from "./jwt-auth.guard";
+import { UserSeeder } from "../seeder/user.seeder";
 
 
 @Module({
@@ -16,7 +17,7 @@ import { JwtAuthGuard } from "./jwt-auth.guard";
             signOptions:{expiresIn:'1h'}
         })
     ],
-    providers:[AuthService,JwtAuthGuard],
+    providers:[AuthService,JwtAuthGuard,UserSeeder],
     controllers:[AuthController],
     exports:[AuthService,JwtModule,JwtAuthGuard]
 })
