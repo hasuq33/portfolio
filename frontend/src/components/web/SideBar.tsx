@@ -19,7 +19,7 @@ const SideBar: React.FC<SideBarProps> = ({ menus }) => {
   return (
     <aside
       className={`
-        h-screen bg-gray-900 text-white
+         bg-gray-900 text-white
         transition-all duration-300 ease-in-out
         ${collapsed ? 'w-16' : 'w-60'}
         flex flex-col

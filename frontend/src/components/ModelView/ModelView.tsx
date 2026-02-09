@@ -32,7 +32,7 @@ const ModelView = ({
   const [view] = useState<ViewType>("list");
 
   return (
-    <div className="flex h-screen">
+    <div className="flex h-[100%]">
       <SideBar menus={[]} />
 
       <div className="flex-1 flex flex-col">
