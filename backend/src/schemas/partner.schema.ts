@@ -26,20 +26,11 @@ export class Partner{
     @Prop({ trim: true })
     address?: string;
 
-    @Prop({ type: String, enum: ['active', 'inactive'], default: 'active' })
-    status: 'active' | 'inactive';
-
     @Prop({ type: [String], default: [] })
     tags: string[];
 
-    @Prop({ default: false })
-    isVerified: boolean;
-
     @Prop()
     website?: string;
-
-    @Prop({ type: Date })
-    joinedAt?: Date;
 }
 
 export const PartnerSchema = SchemaFactory.createForClass(Partner);
