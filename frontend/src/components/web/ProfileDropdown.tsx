@@ -1,6 +1,5 @@
 "use client";
 
-import React from "react";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -14,7 +13,6 @@ import {
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { User, Settings, LifeBuoy, LogOut } from "lucide-react";
 import { apiFetch } from "@/lib/orm_service";
-import { Switch } from "@/components/ui/switch"
 
 type ProfileDropdownProps = {
   user?: {

@@ -18,12 +18,12 @@ export class AuthController{
     @HttpCode(HttpStatus.OK)
     async login(@Body() data:any, @Res({ passthrough: true }) res:Response){
         const {access_token} = await this.authService.login(data);
-
+        console.log(process.env.MAX_AGE,">>>>>>>>>>>>>>>>>>>>")
         res.cookie('access_token', access_token, {
             httpOnly: true,
             secure: false,
             sameSite: 'lax',
-            maxAge: Number(process.env.MAX_AGE)*60*1000 ,
+            maxAge: Number(process.env.MAX_AGE)*24*60*60*1000 ,
             path:'/'
         });
         this.logger.log('/auth/login Susccessully called!')

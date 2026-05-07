@@ -1,19 +1,13 @@
-import ModelView from '@/components/ModelView/ModelView';
+'use client';
+import { useState } from "react";
 
 const page = () =>{
+
+    const [ view , setView ] = useState("list");
+    
     return(
         <div>
-            <div className='min-h-screen'>
-                <ModelView
-                    model="User"
-                    fields={[
-                        { name: "login", label: "Login", type: "char", editable: true },
-                        { name: "name", label: "Name", type: "char" },
-                        { name: "isActivated", label: "Active", type: "boolean" },
-                    ]}
-                    />
-
-            </div>
+            Settings Page
         </div>
     )
 }

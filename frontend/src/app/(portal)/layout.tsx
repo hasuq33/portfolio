@@ -3,7 +3,6 @@ import { redirect } from "next/navigation";
 import { ThemeProvider } from "@/components/theme_provider";
 import NextTopLoader from "nextjs-toploader";
 import "./global.css"
-import StatusBar from "@/components/web/StatusBar";
 import { UserProvider } from "@/context/UserContext";
 
 export default async function PortalLayout({children,}: {children: React.ReactNode;}) {
@@ -31,8 +30,9 @@ export default async function PortalLayout({children,}: {children: React.ReactNo
               via-muted/40
               to-background
               transition-colors">
-                {/* <StatusBar /> */}
-                {children}</main>
+                {children}
+                
+                </main>
             </UserProvider>
           </ThemeProvider>
       </body>

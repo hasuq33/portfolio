@@ -36,7 +36,7 @@ const page = () => {
             return
         }
 
-        window.location.href = "/dashboard"
+        window.location.href = "/web"
       } catch (error) {
         console.error(error);
       }
@@ -103,7 +103,7 @@ const page = () => {
           </div>
 
           {/* Submit */}
-          <Button type="submit" className="w-full rounded-xl">
+          <Button type="submit" className="w-full rounded-xl cursor-pointer">
             Login
           </Button>
         </form>
