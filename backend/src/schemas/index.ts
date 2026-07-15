@@ -4,6 +4,7 @@ import { LeadSchema } from "./lead.schema";
 import { TagsSchema } from "./tags.schema";
 import { BlogsSchema } from "./blogs.schema";
 import { GroupsSchema } from "./groups.schema";
+import { IRConfigSchema } from "./ir.configuration";
 
 export {
     PartnerSchema, 
@@ -11,5 +12,6 @@ export {
     LeadSchema,
     TagsSchema,
     BlogsSchema,
-    GroupsSchema
+    GroupsSchema,
+    IRConfigSchema
 }

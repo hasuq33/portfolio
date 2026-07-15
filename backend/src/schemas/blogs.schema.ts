@@ -7,36 +7,36 @@ export type BlogsDocument =  HydratedDocument<Blogs>
 
 @Schema({timestamps:true,collection:'blogs'})
 export class Blogs {
-j
+
     @Prop({required:true})
-    name:string
+    name!:string
 
     @Prop({type:[{type:mongoose.Schema.Types.ObjectId, ref:'Tags'}],default:[]})
-    tags: (Types.ObjectId | Tags)[];
+    tags!: (Types.ObjectId | Tags)[];
 
     @Prop({maxlength:200,required:true})
-    subtitle:string
+    subtitle!:string
 
     @Prop({required:true})
-    content:string
+    content!:string
 
     @Prop({type:[String],default:[]})
-    keywords:string[]
+    keywords!:string[]
 
     @Prop({})
-    title:string
+    title!:string
 
     @Prop({})
-    description:string
+    description!:string
 
     @Prop({required:true,default:false})
-    isPublished:boolean
+    isPublished!:boolean
 
     @Prop({ required: false }) 
-    backgroundImageUrl: string; 
+    backgroundImageUrl!: string; 
 
     @Prop({type:mongoose.Schema.Types.ObjectId,ref:'partners'})
-    author:Partner
+    author!:Partner
 }
 
 export const BlogsSchema = SchemaFactory.createForClass(Blogs);

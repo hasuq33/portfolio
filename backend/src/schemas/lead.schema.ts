@@ -7,7 +7,7 @@ export type LeadDocument = HydratedDocument<Lead>;
 export class Lead {
   
   @Prop({ required: true, trim: true })
-  name: string;
+  name!: string;
 
   @Prop({ trim: true })
   email?: string;
@@ -23,14 +23,14 @@ export class Lead {
     enum: ['New', 'Contacted', 'Qualified', 'Proposal Sent', 'Won', 'Lost'],
     default: 'New',
   })
-  status: string;
+  status!: string;
 
   @Prop({
     type: String,
     enum: ['Website', 'Referral', 'Cold Call', 'Campaign', 'Social Media', 'Other'],
     default: 'Other',
   })
-  source: string;
+  source!: string;
 
   @Prop({ type: Number, default: 0 })
   estimatedValue?: number;

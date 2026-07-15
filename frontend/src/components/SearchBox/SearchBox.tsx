@@ -42,6 +42,7 @@ export function ViewSearchInputBox() {
         <InputGroupInput
           id="view-search-input"
           placeholder="Search records..."
+          type='search'
           className="
             border-0
             shadow-none

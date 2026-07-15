@@ -4,7 +4,6 @@ import { InjectModel } from "@nestjs/mongoose";
 import { Model } from "mongoose";
 import bcrypt from 'bcrypt';
 import { JwtService } from "@nestjs/jwt";
-import { retry } from "rxjs";
 
 @Injectable()
 export class AuthService{

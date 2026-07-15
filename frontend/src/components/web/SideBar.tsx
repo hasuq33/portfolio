@@ -4,6 +4,9 @@ import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { FiLogOut } from 'react-icons/fi';
+import ProfileDropdown from "./ProfileDropdown";
+import { useUser } from "@/context/UserContext";
+import { ThemeToggler } from "../ThemeToggler";
 
 interface SidebarItem {
   sequence: number;
@@ -21,9 +24,8 @@ const SideBar: React.FC<SideBarProps> = ({
   menus,
   menuTitle = '',
 }) => {
-
   const [collapsed, setCollapsed] = useState(false);
-
+  
   const pathName = usePathname();
 
   // Dynamic title
@@ -37,6 +39,13 @@ const SideBar: React.FC<SideBarProps> = ({
       currentMenu?.name || menuTitle;
 
   }, [pathName, menus, menuTitle]);
+
+  const {user, loading} = useUser();
+  if(loading){
+    return <div className="h-12 animate-pulse bg-muted/40 rounded-md"/>
+  }
+
+  if(!user) return
 
   return (
     <aside
@@ -110,7 +119,9 @@ const SideBar: React.FC<SideBarProps> = ({
           ))}
 
         </div>
-
+        <div className='text-center'>
+        <ProfileDropdown user={user} Class="block lg:hidden"/>
+        <ThemeToggler propsClass={`lg:hidden block`} />
         {/* Footer */}
         <Link
           href="/web"
@@ -136,6 +147,7 @@ const SideBar: React.FC<SideBarProps> = ({
           )}
 
         </Link>
+        </div>
 
       </nav>
 

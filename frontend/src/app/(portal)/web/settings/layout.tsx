@@ -36,7 +36,7 @@ export default function SettingLayout({children}:SettingLayoutProps){
                     <SearchStatusBar />
                 </div>
 
-                <div className="p-4">
+                <div className="p-1">
                     {children}
                 </div>
             </div>

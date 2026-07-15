@@ -21,9 +21,10 @@ type ProfileDropdownProps = {
     companyName?: string;
     login: string;
   };
+  Class?:string
 };
 
-const ProfileDropdown = ({ user }: ProfileDropdownProps) => {
+const ProfileDropdown = ({ user , Class }: ProfileDropdownProps) => {
   const initials =user?.name?.split(" ").map((n) => n[0]).join("").toUpperCase() ?? "U";
 
   const clickLogout = async () => {
@@ -37,12 +38,12 @@ const ProfileDropdown = ({ user }: ProfileDropdownProps) => {
   };
 
   return (
-    <DropdownMenu>
+    <DropdownMenu >
       <DropdownMenuTrigger asChild>
-        <Button variant="ghost"className="
+        <Button variant="ghost"className={`
             h-9 w-9 rounded-full p-0
             hover:bg-muted cursor-pointer
-            focus-visible:ring-0">
+            focus-visible:ring-0 ${Class}`}>
           <Avatar className="h-9 w-9">
             <AvatarFallback
               className="text-xs font-medium bg-muted text-foreground dark:bg-muted/40">

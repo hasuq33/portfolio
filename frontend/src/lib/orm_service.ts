@@ -28,7 +28,7 @@ export const apiFetch = async ({url,method="GET",payload,headers}:fetchOptions)=
             const error = new AppError(message,res.status,"Request Failed");
 
             // Let's emit the global error
-            if(typeof window !== undefined){
+            if(typeof window !== 'undefined'){
                 emitGlobalError({
                     title:error.title,
                     message:error.message,
@@ -41,7 +41,7 @@ export const apiFetch = async ({url,method="GET",payload,headers}:fetchOptions)=
        let test =  new AppError("Connection Failed",500,"Network Failed!")
 
         // Let's emit the global error
-            if(typeof window !== undefined){
+            if(typeof window !== 'undefined'){
                 emitGlobalError({
                     title:test.title,
                     message:test.message,
