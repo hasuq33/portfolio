@@ -11,7 +11,7 @@ export type IrConfigurationDocument =
 export class IrConfiguration {
 
   @Prop({
-    required: true,
+    required: [true, 'Company name is required.'],
     trim: true,
     default: 'My Application',
   })

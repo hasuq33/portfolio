@@ -11,7 +11,7 @@ interface SettingsSectionProps  {
 const SettingsSection = ({title,description,children}:SettingsSectionProps) =>{
     return(
         <div className="border rounded-xl p-6 mb-6 bg-card">
-            <div className="mb-5">\
+            <div className="mb-5">
                 <h2 className="font-semibold text-lg">{title}</h2>
                 {description && (
                     <p className="text-sm text-muted-foreground mt-1">{description}</p>

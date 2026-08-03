@@ -4,6 +4,7 @@ import { ThemeProvider } from "@/components/theme_provider";
 import NextTopLoader from "nextjs-toploader";
 import "./global.css"
 import { UserProvider } from "@/context/UserContext";
+import { ViewSearchProvider } from "@/context/ViewSearchContext";
 
 export default async function PortalLayout({children,}: {children: React.ReactNode;}) {
  const cookieStore = await cookies(); 
@@ -24,15 +25,12 @@ export default async function PortalLayout({children,}: {children: React.ReactNo
           >
             <NextTopLoader showSpinner={false} />
             <UserProvider>
-                <main className="  min-h-screen
-              bg-gradient-to-br
-              from-background
-              via-muted/40
-              to-background
-              transition-colors">
+              <ViewSearchProvider>
+                <main className="h-screen overflow-hidden bg-gradient-to-br from-background via-muted/40 to-background">
                 {children}
                 
                 </main>
+              </ViewSearchProvider>
             </UserProvider>
           </ThemeProvider>
       </body>

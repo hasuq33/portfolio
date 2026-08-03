@@ -30,11 +30,11 @@ export const ErrorProvider = ()=>{
     },[]);
 
     return (
-    <Dialog open={!!error} onOpenChange={() => setError(null)}>
-      <DialogContent>
+    <Dialog  open={!!error} onOpenChange={() => setError(null)}>
+      <DialogContent className="dark:bg-gray-900 bg-white">
         <DialogHeader>
           <DialogTitle>{error?.title ?? "Error"}</DialogTitle>
-          <DialogDescription>{error?.message}</DialogDescription>
+          <DialogDescription className="whitespace-pre-line">{error?.message}</DialogDescription>
         </DialogHeader>
 
         <div className="flex justify-end">

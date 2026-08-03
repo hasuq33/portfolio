@@ -1,8 +1,6 @@
-import { Injectable } from "@nestjs/common";
+import { Injectable , NotFoundException , BadRequestException} from "@nestjs/common";
 import { InjectConnection } from "@nestjs/mongoose";
-import { Mode } from "fs";
 import { Connection , Model , SortOrder } from "mongoose";
-import { retry } from "rxjs";
 
 @Injectable()
 export class CommonService{
@@ -18,6 +16,7 @@ export class CommonService{
     async create(modelName:string, data:any){
         const model = this.getModel(modelName);
         const doc = new model(data);
+        await doc.validate();
         return doc.save();
     }
 
@@ -28,56 +27,114 @@ export class CommonService{
 
     async findById(modelName:string,id:string){
         const model = this.getModel(modelName);
-        return model.findById(id).exec();
+        const document = await model.findById(id).exec();
+        
+
+        if (!document) {
+            throw new NotFoundException(
+                `${modelName} record with ID '${id}' was not found.`,
+            );
+        }
+
+        return document;
     }
 
     async update(modelName:string,id:string,data:any){
         const model =  this.getModel(modelName);
-        return model.findByIdAndUpdate(id,data,{new:true}).exec();
+        const document = await model.findByIdAndUpdate(id, data, {
+            new: true,
+            runValidators: true,
+            context: 'query',
+        }).exec();
+
+         if (!document) {
+            throw new NotFoundException(
+                `${modelName} record with ID '${id}' was not found.`,
+            );
+        }
+
+        return document;
     }
 
     async delete(modelName: string, id: string) {
         const model = this.getModel(modelName);
-        return model.findByIdAndDelete(id).exec();
+        const document = await model.findByIdAndDelete(id).exec();
+
+         if (!document) {
+            throw new NotFoundException(
+                `${modelName} record with ID '${id}' was not found.`,
+            );
+            }
+
+        return document;
     }
 
-    private domainToMongo(domain:[string,string,any][]){
-        const filter: any = {};
-
-        for(const [field,operator,value] of domain){
-            switch(operator){
-                case "=":
-                    filter[field] = value; 
-                    break;
-                case "!=":
-                    filter[field] = { $ne:value };
-                    break;
-                case ">":
-                    filter[field] = { $gt:value };
-                    break;
-                case "<":
-                    filter[field] = { $lt:value };
-                    break;
-                case ">=":
-                    filter[field] = { $gte: value };
-                    break;
-                case "<=":
-                    filter[field] = { $lte: value };
-                    break;
-
-                case "in":
-                    filter[field] = { $in: value };
-                    break;
-
-                case "not in":
-                    filter[field] = { $nin: value };
-                    break;
-                default:
-                    throw new Error(`Unsupported domain operator: ${operator}`);
-            }
-            return filter;
+    private addOperator(filter: Record<string, any>,field:string,operator: string,value: any){
+        filter[field] = {
+            ...(filter[field] || {}),
+            [operator]:value
         }
     }
+
+    private escapeRegex(value: string) {
+        return value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    }
+
+    private domainToMongo(
+  domain: [string, string, any][],
+) {
+  const filter: Record<string, any> = {};
+
+  for (const [field, operator, value] of domain) {
+    switch (operator) {
+      case "=":
+        filter[field] = value;
+        break;
+
+      case "!=":
+        this.addOperator(filter, field, "$ne", value);
+        break;
+
+      case ">":
+        this.addOperator(filter, field, "$gt", value);
+        break;
+
+      case "<":
+        this.addOperator(filter, field, "$lt", value);
+        break;
+
+      case ">=":
+        this.addOperator(filter, field, "$gte", value);
+        break;
+
+      case "<=":
+        this.addOperator(filter, field, "$lte", value);
+        break;
+
+      case "in":
+        this.addOperator(filter, field, "$in", value);
+        break;
+
+      case "not in":
+        this.addOperator(filter, field, "$nin", value);
+        break;
+
+      case "contains":
+        filter[field] = {
+          $regex: this.escapeRegex(String(value)),
+          $options: "i",
+        };
+        break;
+
+      default:
+        throw new BadRequestException(
+          `Unsupported domain operator: ${operator}`,
+        );
+    }
+  }
+
+  return filter;
+}
 
     private orderToMongo(order:string): Record<string,SortOrder>{
         if(!order) return {};

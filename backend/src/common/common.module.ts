@@ -5,9 +5,9 @@ import { CommonService } from "./common.service";
 import { AuthModule } from "../auth/auth.module";
 
 @Module({
-    imports:[AuthModule , DatabaseModule],
+    imports:[AuthModule , DatabaseModule ],
     controllers:[CommonController],
-    providers:[CommonService],
-    exports:[CommonService]
+    exports:[CommonService],
+    providers:[CommonService]
 })
 export class CommonModule{}

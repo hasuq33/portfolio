@@ -57,6 +57,7 @@ const SettingsSaveBar = ({
         variant="outline"
         onClick={onDiscard}
         disabled={saving}
+        className={'cursor-pointer'}
       >
         <RotateCcw className="w-4 h-4 mr-2" />
         Discard
@@ -66,6 +67,7 @@ const SettingsSaveBar = ({
       <Button
         onClick={onSave}
         disabled={saving}
+        className={'cursor-pointer'}
       >
         <Save className="w-4 h-4 mr-2" />
         {saving ? "Saving..." : "Save Changes"}

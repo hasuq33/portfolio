@@ -42,7 +42,7 @@ export class CommonController{
         @Param("model") model:string,
         @Body("id") id: string,
     ){
-        this.logger.log(`UPDATE api/${model}/${id}`);
+        this.logger.log(`READ api/${model}/${id}`);
         return this.commonService.findById(model,id);
     }
 
@@ -55,7 +55,7 @@ export class CommonController{
         return this.commonService.update(model,id,data);
     }
 
-    @Delete('id')
+    @Delete(':id')
     async delete(@Param('model') model:string, @Param('id') id:string){
         return this.commonService.delete(model, id );
     }

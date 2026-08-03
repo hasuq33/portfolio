@@ -120,8 +120,8 @@ const SideBar: React.FC<SideBarProps> = ({
 
         </div>
         <div className='text-center'>
-        <ProfileDropdown user={user} Class="block lg:hidden"/>
-        <ThemeToggler propsClass={`lg:hidden block`} />
+        <ProfileDropdown user={user} Class="flex items-center gap-3 mx-3 mb-3  px-4  hover:bg-gray-100   dark:text-gray-300   dark:hover:bg-gray-500   dark:hover:text-white   transition-colors  lg:hidden"/>
+        <ThemeToggler propsClass={`lg:hidden  flex items-center gap-3   px-4  hover:bg-gray-100   dark:text-gray-300   dark:hover:bg-gray-500   dark:hover:text-white   transition-colors   `} />
         {/* Footer */}
         <Link
           href="/web"

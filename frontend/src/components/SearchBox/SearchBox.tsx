@@ -1,60 +1,76 @@
-'use client';
+"use client";
 
-import { SearchIcon } from 'lucide-react';
-
+import { ChangeEvent, KeyboardEvent, useEffect, useRef } from "react";
+import { SearchIcon, X } from "lucide-react";
 import {
   InputGroup,
   InputGroupAddon,
+  InputGroupButton,
   InputGroupInput,
-} from '@/components/ui/input-group';
+} from "@/components/ui/input-group";
 
-export function ViewSearchInputBox() {
+interface ViewSearchInputBoxProps {
+  value?: string;
+  placeholder?: string;
+  onChange?: (value: string) => void;
+  onEscape?: () => void;
+}
+
+export function ViewSearchInputBox({
+  value = "",
+  placeholder = "Search records...",
+  onChange,
+  onEscape,
+}: ViewSearchInputBoxProps) {
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    const focusSearch = (event: globalThis.KeyboardEvent) => {
+      if (event.key !== "/" || event.ctrlKey || event.metaKey || event.altKey) return;
+      const target = event.target as HTMLElement | null;
+      if (target?.matches("input, textarea, select, [contenteditable='true']")) return;
+      event.preventDefault();
+      inputRef.current?.focus();
+    };
+
+    window.addEventListener("keydown", focusSearch);
+    return () => window.removeEventListener("keydown", focusSearch);
+  }, []);
+
+  const handleKeyDown = (event: KeyboardEvent<HTMLInputElement>) => {
+    if (event.key === "Escape") {
+      onEscape?.();
+      inputRef.current?.blur();
+    }
+  };
 
   return (
-    <div className="w-full max-w-sm">
-
-      <InputGroup
-        className="
-          rounded-xl
-          border
-          border-gray-200
-          dark:border-gray-700
-          bg-white
-          dark:bg-gray-900
-          shadow-sm
-          transition-all
-          focus-within:ring-2
-          focus-within:ring-blue-500/20
-          focus-within:border-blue-500
-        "
-      >
-
-        <InputGroupAddon
-          align="inline-start"
-          className="pl-3"
-        >
-          <SearchIcon
-            size={18}
-            className="text-muted-foreground"
-          />
+    <InputGroup className="h-10 rounded-lg bg-background shadow-none">
+      <InputGroupAddon align="inline-start">
+        <SearchIcon className="size-4" />
+      </InputGroupAddon>
+      <InputGroupInput
+        ref={inputRef}
+        id="view-search-input"
+        type="search"
+        value={value}
+        placeholder={placeholder}
+        aria-label={placeholder}
+        onChange={(event: ChangeEvent<HTMLInputElement>) => onChange?.(event.target.value)}
+        onKeyDown={handleKeyDown}
+        className="h-10 text-sm [&::-webkit-search-cancel-button]:hidden"
+      />
+      {value ? (
+        <InputGroupAddon align="inline-end">
+          <InputGroupButton aria-label="Clear search" size="icon-xs" onClick={() => onChange?.("")}>
+            <X />
+          </InputGroupButton>
         </InputGroupAddon>
-
-        <InputGroupInput
-          id="view-search-input"
-          placeholder="Search records..."
-          type='search'
-          className="
-            border-0
-            shadow-none
-            focus-visible:ring-0
-            bg-transparent
-            text-sm
-            h-11
-          "
-        />
-
-      </InputGroup>
-
-    </div>
+      ) : (
+        <InputGroupAddon align="inline-end">
+          <kbd className="hidden border bg-muted px-1.5 py-0.5 text-[10px] font-medium sm:inline">/</kbd>
+        </InputGroupAddon>
+      )}
+    </InputGroup>
   );
 }

@@ -1,52 +1,68 @@
 import { emitGlobalError } from "./error-event";
 import { AppError } from "./error";
 
-interface fetchOptions {
-    url: string, 
-    method?: "GET" | "POST" | "PUT" | "PATCH" | "DELETE",
-    payload?:BodyInit,
-    headers?:HeadersInit,
+interface FetchOptions {
+    url: string;
+    method?: "GET" | "POST" | "PUT" | "PATCH" | "DELETE";
+    payload?: BodyInit;
+    headers?: HeadersInit;
 }
 
-export const apiFetch = async ({url,method="GET",payload,headers}:fetchOptions)=>{
-    try {
-       const res =  await fetch(process.env.NEXT_PUBLIC_BACKEND_URL+url,{
-            method:method,
-            credentials:"include",
-            headers:headers,
-            body:payload
-        })
+interface ApiErrorResponse {
+    message?: string;
+    error?: string;
+    errors?: Array<{ field?: string; message?: string }>;
+}
 
-        if(!res.ok){
-            let message ='Something went wrong!';
+export const apiFetch = async ({ url, method = "GET", payload, headers }: FetchOptions) => {
+    try {
+        const response = await fetch(process.env.NEXT_PUBLIC_BACKEND_URL + url, {
+            method,
+            credentials: "include",
+            headers,
+            body: payload,
+        });
+
+        if (!response.ok) {
+            let message = "Something went wrong!";
+            let title = "Request Failed";
 
             try {
-                const data = await res.json();
-                message =  data.message?? message;
-            } catch (error) {}
+                const data = await response.json() as ApiErrorResponse;
+                title = data.error ?? title;
 
-            const error = new AppError(message,res.status,"Request Failed");
+                const fieldMessages = data.errors
+                    ?.map((error) => error.message)
+                    .filter((fieldMessage): fieldMessage is string => Boolean(fieldMessage));
 
-            // Let's emit the global error
-            if(typeof window !== 'undefined'){
+                message = fieldMessages?.length
+                    ? fieldMessages.join("\n")
+                    : data.message ?? message;
+            } catch {
+                // Keep the fallback message when the response is not JSON.
+            }
+
+            const error = new AppError(message, response.status, title);
+
+            if (typeof window !== "undefined") {
                 emitGlobalError({
-                    title:error.title,
-                    message:error.message,
-                    status:error.status
-                })
+                    title: error.title,
+                    message: error.message,
+                    status: error.status,
+                });
             }
         }
-        return  res
-    } catch (error) {
-       let test =  new AppError("Connection Failed",500,"Network Failed!")
 
-        // Let's emit the global error
-            if(typeof window !== 'undefined'){
-                emitGlobalError({
-                    title:test.title,
-                    message:test.message,
-                    status:test.status
-                })
-            }
+        return response;
+    } catch {
+        const error = new AppError("Connection Failed", 500, "Network Failed!");
+
+        if (typeof window !== "undefined") {
+            emitGlobalError({
+                title: error.title,
+                message: error.message,
+                status: error.status,
+            });
+        }
     }
-}
+};

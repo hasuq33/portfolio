@@ -20,9 +20,11 @@ export const TextWidget = ({
 
       <input
         id={field.name}
-        type="text"
+        type={field.widget === "password" ? "password" : field.widget === "email" ? "email" : field.widget === "url" ? "url" : "text"}
         value={value ?? ""}
         placeholder={field.placeholder}
+        required={field.required}
+        aria-required={field.required}
         readOnly={readonly}
         onChange={(e) =>
           onChange?.(e.target.value)
