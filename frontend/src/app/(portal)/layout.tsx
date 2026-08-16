@@ -3,12 +3,12 @@ import { redirect } from "next/navigation";
 import { ThemeProvider } from "@/components/theme_provider";
 import NextTopLoader from "nextjs-toploader";
 import "./global.css"
-import StatusBar from "@/components/web/StatusBar";
 import { UserProvider } from "@/context/UserContext";
+import { ViewSearchProvider } from "@/context/ViewSearchContext";
 
 export default async function PortalLayout({children,}: {children: React.ReactNode;}) {
  const cookieStore = await cookies(); 
- const token = cookieStore.get("access_token");
+ const token = cookieStore.get("access_token") ?? cookieStore.get("refresh_token");
 
   if (!token) {
     redirect("/web/login");
@@ -25,14 +25,12 @@ export default async function PortalLayout({children,}: {children: React.ReactNo
           >
             <NextTopLoader showSpinner={false} />
             <UserProvider>
-                <main className="  min-h-screen
-              bg-gradient-to-br
-              from-background
-              via-muted/40
-              to-background
-              transition-colors">
-                {/* <StatusBar /> */}
-                {children}</main>
+              <ViewSearchProvider>
+                <main className="h-screen overflow-hidden bg-gradient-to-br from-background via-muted/40 to-background">
+                {children}
+                
+                </main>
+              </ViewSearchProvider>
             </UserProvider>
           </ThemeProvider>
       </body>

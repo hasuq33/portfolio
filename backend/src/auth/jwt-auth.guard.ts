@@ -1,35 +1,28 @@
-import { JwtService } from '@nestjs/jwt';
-import { Injectable , CanActivate , ExecutionContext , UnauthorizedException } from "@nestjs/common";
-import { InjectModel } from '@nestjs/mongoose';
-import { Model } from "mongoose";
-import { User } from "../schemas/user.schema";
+import {
+  CanActivate,
+  ExecutionContext,
+  Injectable,
+  UnauthorizedException,
+} from '@nestjs/common';
+import type { Request } from 'express';
+import { AuthService } from './auth.service';
+import { ACCESS_TOKEN_COOKIE } from './auth.constants';
 
 @Injectable()
 export class JwtAuthGuard implements CanActivate {
-    constructor(@InjectModel(User.name) private readonly userModel: Model<User>,private readonly  jwtService:JwtService){};
+  constructor(private readonly authService: AuthService) {}
 
-     async canActivate(context: ExecutionContext){
-        const req =  context.switchToHttp().getRequest();
-        const cookies = req.cookies;
-        console.log(cookies);
-        if(!cookies){
-            throw new UnauthorizedException("Missing Authoization Header");
-        }
+  async canActivate(context: ExecutionContext) {
+    const request = context
+      .switchToHttp()
+      .getRequest<Request & { user?: unknown }>();
+    const accessToken = request.cookies?.[ACCESS_TOKEN_COOKIE] as
+      | string
+      | undefined;
+    if (!accessToken)
+      throw new UnauthorizedException('Authentication is required.');
 
-        const token = cookies.access_token;
-        if(!token){
-            throw new UnauthorizedException('Invalid token format');
-        }
-
-        try {
-            const payload = this.jwtService.verify(token);
-            const { login } = payload;
-            if(!login) throw  new UnauthorizedException('Invalid User!'); 
-            const user = await this.userModel.findOne({login:login});
-            req.user = user;
-            return Boolean(user);
-        } catch (error) {
-            throw new UnauthorizedException('Invalid or expired token!');
-        }
-    }
+    request.user = await this.authService.authenticateAccessToken(accessToken);
+    return true;
+  }
 }

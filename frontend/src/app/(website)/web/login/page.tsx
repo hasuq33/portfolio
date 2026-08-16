@@ -1,127 +1,115 @@
-'use client'
-import { InputGroup, InputGroupInput, InputGroupAddon } from "@/components/ui/input-group";
-import { MailIcon } from "lucide-react";
-import { MdVpnKey } from "react-icons/md";
-import { Button } from "@/components/ui/button";
+"use client";
+
+import { FormEvent, useState } from "react";
 import Link from "next/link";
-import React , { useState } from "react";
-import DOMPurify from "dompurify";
-import { ImCross } from "react-icons/im";
+import { Loader2, UserRound } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { AuthMessage, AuthPasswordField, AuthShell, AuthTextField } from "@/components/auth/AuthForm";
 import { apiFetch } from "@/lib/orm_service";
+import { AuthFieldErrors, readAuthError } from "@/lib/auth-form";
 
-const page = () => {
-  const [error, setError ] = useState<string>('');
-  const sanitize = (value:string)=>{
-    return DOMPurify.sanitize(value,{ ALLOWED_TAGS: [], ALLOWED_ATTR: [] });
-  }
+export default function LoginPage() {
+  const [login, setLogin] = useState("");
+  const [password, setPassword] = useState("");
+  const [rememberMe, setRememberMe] = useState(false);
+  const [errors, setErrors] = useState<AuthFieldErrors>({});
+  const [apiError, setApiError] = useState("");
+  const [loading, setLoading] = useState(false);
 
-  const handleSubmit  = async (ev: React.FormEvent<HTMLFormElement>) =>{
-    ev.preventDefault();
-      const formData = new FormData(ev.currentTarget);
-      const payload = {
-        login:sanitize(formData.get("login") as string),
-        password: sanitize(formData.get("password") as string),
-        remember: formData.get("remember") === "on",
+  const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    const nextErrors: AuthFieldErrors = {};
+    if (!login.trim()) nextErrors.login = "Username or email is required.";
+    if (!password) nextErrors.password = "Password is required.";
+    if (Object.keys(nextErrors).length) {
+      setErrors(nextErrors);
+      return;
+    }
+
+    setLoading(true);
+    setErrors({});
+    setApiError("");
+    try {
+      const response = await apiFetch({
+        url: "/auth/login",
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        payload: JSON.stringify({ login: login.trim(), password, rememberMe }),
+        suppressGlobalError: true,
+      });
+      if (!response?.ok) {
+        const error = await readAuthError(response, "Invalid login credentials.");
+        setErrors(error.fields);
+        setApiError(response?.status === 401 ? "Invalid login credentials." : error.message);
+        return;
       }
-      try {
-       const res = await apiFetch({url:"/auth/login",
-          method:"POST",
-          headers:{
-             "Content-Type": "application/json",
-          },
-          payload:JSON.stringify(payload)
-        })
-        if(!res?.ok){
-            setError("Login Failed");
-            return
-        }
-
-        window.location.href = "/dashboard"
-      } catch (error) {
-        console.error(error);
-      }
-  }
+      window.location.assign("/web");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
-    <div className="form-format flex items-center justify-center bg-muted/30 px-4">
-      <div className="w-full max-w-md rounded-3xl dark:bg-gray-900 shadow-lg border p-6 space-y-6">
+    <AuthShell
+      title="Welcome Back"
+      description="Login to continue to your account"
+      footer={(
+        <p className="text-center text-sm text-muted-foreground">
+          Don&apos;t have an account?{" "}
+          <Link href="/web/signup" className="font-medium text-primary hover:underline">Sign up</Link>
+        </p>
+      )}
+    >
+      <form onSubmit={handleSubmit} noValidate className="space-y-4">
+        <AuthTextField
+          id="login"
+          name="login"
+          label="Username or email"
+          type="text"
+          value={login}
+          onChange={(event) => {
+            setLogin(event.target.value);
+            setErrors((current) => ({ ...current, login: "" }));
+          }}
+          autoComplete="username"
+          autoFocus
+          placeholder="Username or email"
+          error={errors.login}
+          icon={<UserRound className="size-4 text-muted-foreground" />}
+        />
+        <AuthPasswordField
+          id="password"
+          name="password"
+          label="Password"
+          value={password}
+          onChange={(event) => {
+            setPassword(event.target.value);
+            setErrors((current) => ({ ...current, password: "" }));
+          }}
+          autoComplete="current-password"
+          placeholder="Password"
+          error={errors.password}
+        />
 
-        {/* Header */}
-        <div className="text-center space-y-1">
-          <h1 className="text-2xl font-semibold tracking-tight">Welcome Back</h1>
-          <p className="text-sm text-muted-foreground">
-            Login to continue to your account
-          </p>
+        <div className="flex items-center justify-between gap-4 text-sm">
+          <label className="flex cursor-pointer items-center gap-2">
+            <input
+              type="checkbox"
+              checked={rememberMe}
+              onChange={(event) => setRememberMe(event.target.checked)}
+              className="size-4 rounded border-gray-300 accent-primary"
+            />
+            <span className="text-muted-foreground">Remember me</span>
+          </label>
+          <Link href="/web/forgot-password" className="text-primary hover:underline">Forgot password?</Link>
         </div>
 
-        {/* Form */}
-        <form method="post" onSubmit={handleSubmit} className="space-y-4">
-
-          {/* Email */}
-          <InputGroup>
-            <InputGroupInput
-              required
-              type="text"
-              name="login"
-              placeholder="Email address"
-            />
-            <InputGroupAddon>
-              <MailIcon className="h-4 w-4 text-muted-foreground" />
-            </InputGroupAddon>
-          </InputGroup>
-
-          {/* Password */}
-          <InputGroup>
-            <InputGroupInput
-              required
-              type="password"
-              name="password"
-              placeholder="Password"
-            />
-            <InputGroupAddon>
-              <MdVpnKey className="h-4 w-4 text-muted-foreground" />
-            </InputGroupAddon>
-          </InputGroup>
-
-          {/* Remember + Reset */}
-          <div className="flex items-center justify-between text-sm">
-            <label className="flex items-center gap-2 cursor-pointer">
-              <input
-                type="checkbox"
-                name="remember"
-                className="h-4 w-4 rounded border-gray-300 accent-primary"
-              />
-              <span className="text-muted-foreground">Remember me</span>
-            </label>
-
-            <Link
-              href="/web/reset-password"
-              className="text-primary hover:underline"
-            >
-              Forgot password?
-            </Link>
-          </div>
-
-          {/* Submit */}
-          <Button type="submit" className="w-full rounded-xl">
-            Login
-          </Button>
-        </form>
-
-        {/* Footer */}
-        <p className="text-center text-sm text-muted-foreground">
-          Don’t have an account?{" "}
-          <Link
-            href="/web/signup"
-            className="text-primary font-medium hover:underline"
-          >
-            Sign up
-          </Link>
-        </p>
-        {error && <p className="text-red-700 ht-flex-row-center gap-2"><ImCross/> {error}</p>}
-      </div>
-    </div>
+        {apiError && <AuthMessage type="error">{apiError}</AuthMessage>}
+        <Button type="submit" disabled={loading} className="w-full cursor-pointer rounded-xl">
+          {loading && <Loader2 className="animate-spin" />}
+          {loading ? "Logging in..." : "Login"}
+        </Button>
+      </form>
+    </AuthShell>
   );
-};
-
-export default page;
+}

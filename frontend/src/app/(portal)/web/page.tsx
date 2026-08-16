@@ -5,7 +5,7 @@ import StatusBar from '@/components/web/StatusBar';
 
 export default async function DashboardPage() {
   const cookieStore = await cookies(); 
-  const token = cookieStore.get("access_token");
+  const token = cookieStore.get("access_token") ?? cookieStore.get("refresh_token");
 
 
   if (!token) {

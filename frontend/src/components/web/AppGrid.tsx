@@ -11,16 +11,18 @@ import {
   Users,
   FileText,
   Settings,
+  MessageCircle
 } from "lucide-react";
 import { FaHandshakeSimple } from "react-icons/fa6";
 
 const apps = [
-  { name: "Dashboard", icon: LayoutGrid, href: "/dashboard/home", accent: "from-blue-500 to-indigo-500" },
-  {name:"CRM",icon: FaHandshakeSimple,href:"/dashboard/crm", accent: "from-teal-500 to-cyan-500" },
-  { name: "Sales", icon: ShoppingCart, href: "/dashboard/sales", accent: "from-emerald-500 to-green-500" },
-  { name: "Projects", icon: FolderKanban, href: "/dashboard/projects", accent: "from-purple-500 to-fuchsia-500" },
-  { name: "HR", icon: Users, href: "/dashboard/hr", accent: "from-pink-500 to-rose-500" },
-  { name: "Blog", icon: FileText, href: "/dashboard/blog", accent: "from-orange-500 to-amber-500" },
+  {name:"Chat",icon:MessageCircle,href:'/web/chat',accent: "from-red-400 to-orange-900"},
+  { name: "Dashboard", icon: LayoutGrid, href: "/web/dashboard/", accent: "from-blue-500 to-indigo-500" },
+  {name:"CRM",icon: FaHandshakeSimple,href:"/web/crm", accent: "from-teal-500 to-cyan-500" },
+  { name: "Sales", icon: ShoppingCart, href: "/web/sales", accent: "from-emerald-500 to-green-500" },
+  { name: "Projects", icon: FolderKanban, href: "/web/projects", accent: "from-purple-500 to-fuchsia-500" },
+  { name: "HR", icon: Users, href: "/web/hr", accent: "from-pink-500 to-rose-500" },
+  { name: "Blog", icon: FileText, href: "/web/blog", accent: "from-orange-500 to-amber-500" },
   { name: "Settings", icon: Settings, href: "/web/settings", accent: "from-zinc-500 to-zinc-700" },
 ];
 
