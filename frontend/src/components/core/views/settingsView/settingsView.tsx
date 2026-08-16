@@ -48,13 +48,13 @@ const SettingsView = ({
   }, [configs.sections, searchField, searchQuery]);
 
   return (
-    <div className="mx-auto max-w-6xl md:p-6">
+    <div className="mx-auto max-w-6xl p-3 sm:p-6">
       <SettingsHeader title="Settings" description="Configure your application preferences" />
       {visibleSections.length ? (
-        <div className="space-y-6">
+        <div className="divide-y divide-border/60 overflow-hidden rounded-2xl border border-border/70 bg-card/70 shadow-sm dark:bg-card/50">
           {visibleSections.map((section) => (
             <SettingsSection title={section.title} description={section.description} key={section.title}>
-              <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+              <div className="grid grid-cols-1 gap-y-1">
                 {section.fields.map((field) => (
                   <WidgetRenderer
                     key={field.name}
@@ -62,6 +62,7 @@ const SettingsView = ({
                     field={field}
                     value={data[field.name] ?? ""}
                     readonly={disabled}
+                    appearance="settings"
                     onChange={(value) => onChange(field.name, value)}
                   />
                 ))}

@@ -1,11 +1,7 @@
-
-import { Controller } from "@nestjs/common";
-import { UseGuards } from "@nestjs/common";
-import { JwtAuthGuard } from "./jwt-auth.guard";
+import { Controller } from '@nestjs/common';
+import { UseGuards } from '@nestjs/common';
+import { JwtAuthGuard } from './jwt-auth.guard';
 
 @UseGuards(JwtAuthGuard)
-@Controller("user")
-export class SetSessionController{
-
-
-}
+@Controller('user')
+export class SetSessionController {}

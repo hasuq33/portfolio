@@ -1,15 +1,13 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { HydratedDocument } from 'mongoose';
 
-export type IrConfigurationDocument =
-  HydratedDocument<IrConfiguration>;
+export type IrConfigurationDocument = HydratedDocument<IrConfiguration>;
 
 @Schema({
   timestamps: true,
   collection: 'ir.configuration',
 })
 export class IrConfiguration {
-
   @Prop({
     required: [true, 'Company name is required.'],
     trim: true,
@@ -27,7 +25,7 @@ export class IrConfiguration {
   @Prop({
     required: false,
     trim: true,
-    default:''
+    default: '',
   })
   mainEmail!: string;
 

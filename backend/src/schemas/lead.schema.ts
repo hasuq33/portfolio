@@ -5,7 +5,6 @@ export type LeadDocument = HydratedDocument<Lead>;
 
 @Schema({ timestamps: true, collection: 'lead' })
 export class Lead {
-  
   @Prop({ required: true, trim: true })
   name!: string;
 
@@ -27,7 +26,14 @@ export class Lead {
 
   @Prop({
     type: String,
-    enum: ['Website', 'Referral', 'Cold Call', 'Campaign', 'Social Media', 'Other'],
+    enum: [
+      'Website',
+      'Referral',
+      'Cold Call',
+      'Campaign',
+      'Social Media',
+      'Other',
+    ],
     default: 'Other',
   })
   source!: string;

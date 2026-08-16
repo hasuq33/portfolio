@@ -1,12 +1,5 @@
-'use client';
-import { useState } from "react";
+import { UsersWorkspace } from "@/components/core/views/userView/UsersWorkspace";
 
-const page = () => {
-  const [ view , setView ] = useState("list");
-  
-  return (
-    <div>User page</div>
-  )
+export default function UsersPage() {
+  return <UsersWorkspace />;
 }
-
-export default page;

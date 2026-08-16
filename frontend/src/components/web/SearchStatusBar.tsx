@@ -76,7 +76,7 @@ export const SearchStatusBar = () => {
                 <ChevronDown />
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="start" className="w-56">
+            <DropdownMenuContent align="start" className="w-56 dark:bg-gray-900 bg-white">
               <DropdownMenuLabel>Search within</DropdownMenuLabel>
               <DropdownMenuRadioGroup value={state.searchField ?? "__all__"} onValueChange={(value) => setSearchField(value === "__all__" ? null : value)}>
                 <DropdownMenuRadioItem value="__all__">All fields</DropdownMenuRadioItem>
@@ -156,7 +156,7 @@ export const SearchStatusBar = () => {
         )}
 
         {hasRefinements && (
-          <Button variant="ghost" size="icon" title="Clear search and refinements" aria-label="Clear search and refinements" onClick={clear}>
+          <Button className="cursor-pointer" variant="ghost" size="icon" title="Clear search and refinements" aria-label="Clear search and refinements" onClick={clear}>
             <RotateCcw />
           </Button>
         )}

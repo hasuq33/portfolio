@@ -1,37 +1,32 @@
-import { Module } from "@nestjs/common";
-import { MongooseModule } from "@nestjs/mongoose";
-import mongoose from "mongoose";
-import { PartnerSchema , UserSchema , LeadSchema , TagsSchema , BlogsSchema , IRConfigSchema } from "../schemas";
-
-import 'dotenv/config';
-const MONGODB_URI = process.env.MONGODB_URI as string
-
+import { Module } from '@nestjs/common';
+import { ConfigModule, ConfigService } from '@nestjs/config';
+import { MongooseModule } from '@nestjs/mongoose';
+import {
+  PartnerSchema,
+  UserSchema,
+  LeadSchema,
+  TagsSchema,
+  BlogsSchema,
+  IRConfigSchema,
+} from '../schemas';
 @Module({
-    imports:[
-        MongooseModule.forRootAsync({
-            useFactory: async ()=>{
-                mongoose.connection.on('connected', () => {
-                console.log('✅ MongoDB connected successfully!');
-                });
-
-                mongoose.connection.on('error', (err) => {
-                console.error('❌ MongoDB connection error:', err);
-                });
-                return {
-                    uri: MONGODB_URI
-                }
-            }
-        }),
-        MongooseModule.forFeature([
-            {name:'User',schema: UserSchema},
-            {name:'Partner', schema: PartnerSchema },
-            {name:'Lead',schema:LeadSchema},
-            {name:'Tags',schema:TagsSchema},
-            {name:"Blogs",schema:BlogsSchema},
-            {name:"ir.configuration",schema:IRConfigSchema}
-        ])
-    ],
-    exports:[MongooseModule]
+  imports: [
+    MongooseModule.forRootAsync({
+      imports: [ConfigModule],
+      inject: [ConfigService],
+      useFactory: (configService: ConfigService) => ({
+        uri: configService.getOrThrow<string>('MONGODB_URI'),
+      }),
+    }),
+    MongooseModule.forFeature([
+      { name: 'User', schema: UserSchema },
+      { name: 'Partner', schema: PartnerSchema },
+      { name: 'Lead', schema: LeadSchema },
+      { name: 'Tags', schema: TagsSchema },
+      { name: 'Blogs', schema: BlogsSchema },
+      { name: 'ir.configuration', schema: IRConfigSchema },
+    ]),
+  ],
+  exports: [MongooseModule],
 })
-export class DatabaseModule{
-}
+export class DatabaseModule {}

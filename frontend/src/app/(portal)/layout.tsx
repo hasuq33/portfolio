@@ -8,7 +8,7 @@ import { ViewSearchProvider } from "@/context/ViewSearchContext";
 
 export default async function PortalLayout({children,}: {children: React.ReactNode;}) {
  const cookieStore = await cookies(); 
- const token = cookieStore.get("access_token");
+ const token = cookieStore.get("access_token") ?? cookieStore.get("refresh_token");
 
   if (!token) {
     redirect("/web/login");

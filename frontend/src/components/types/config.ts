@@ -15,10 +15,23 @@ export interface ConfigField {
     | 'switch'
     | 'select'
     | 'color'
-    | 'url';
+    | 'url'
+    | 'tel'
+    | 'date'
+    | 'tags';
 
   placeholder?: string;
   required?: boolean;
+  readonly?: boolean;
+  disabled?: boolean;
+  invisible?: boolean;
+  autoFocus?: boolean;
+  colSpan?: 1 | 2;
+  helpText?: string;
+  imageAccept?: string;
+  imageMaxSizeMb?: number;
+  imageFallback?: string;
+  imageColorClassName?: string;
   options?: ConfigOption[];
 }
 

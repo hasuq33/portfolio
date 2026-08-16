@@ -3,6 +3,7 @@ import { TextAreaWidget } from "./textArea";
 import { BooleanWidget } from "./boolean";
 import { SelectWidget } from "./select";
 import { ImageWidget } from "./image";
+import { TagsWidget } from "./tags";
 
 export const WidgetRegistry = {
     text: TextWidget,
@@ -14,4 +15,7 @@ export const WidgetRegistry = {
     switch: BooleanWidget,
     select: SelectWidget,
     image: ImageWidget,
+    tel: TextWidget,
+    date: TextWidget,
+    tags: TagsWidget,
 }

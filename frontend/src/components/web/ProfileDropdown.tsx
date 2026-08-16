@@ -10,22 +10,24 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { User, Settings, LifeBuoy, LogOut } from "lucide-react";
 import { apiFetch } from "@/lib/orm_service";
+import { getUserAvatarColor, getUserAvatarUrl, getUserInitial } from "@/lib/user-avatar";
+import type { CurrentUser } from "@/context/UserContext";
 
 type ProfileDropdownProps = {
-  user?: {
-    name: string;
-    email: string;
-    companyName?: string;
-    login: string;
-  };
+  user?: CurrentUser;
   Class?:string
 };
 
 const ProfileDropdown = ({ user , Class }: ProfileDropdownProps) => {
-  const initials =user?.name?.split(" ").map((n) => n[0]).join("").toUpperCase() ?? "U";
+  const initial = getUserInitial(user?.name, user?.login);
+  const fallbackColor = getUserAvatarColor(user?.name, user?.login);
+  const avatarVersion = user?.updatedAt ? new Date(user.updatedAt).getTime() : undefined;
+  const avatarSrc = user?._id && user.hasAvatar
+    ? getUserAvatarUrl(user._id, avatarVersion)
+    : undefined;
 
   const clickLogout = async () => {
     await apiFetch({
@@ -45,9 +47,16 @@ const ProfileDropdown = ({ user , Class }: ProfileDropdownProps) => {
             hover:bg-muted cursor-pointer
             focus-visible:ring-0 ${Class}`}>
           <Avatar className="h-9 w-9">
+            {avatarSrc && (
+              <AvatarImage
+                src={avatarSrc}
+                alt={`${user?.name?.trim() || user?.login || "User"} profile`}
+                className="object-cover"
+              />
+            )}
             <AvatarFallback
-              className="text-xs font-medium bg-muted text-foreground dark:bg-muted/40">
-              {initials}
+              className={`${fallbackColor} text-xs font-medium`}>
+              {initial}
             </AvatarFallback>
           </Avatar>
         </Button>

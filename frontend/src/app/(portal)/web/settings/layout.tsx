@@ -31,12 +31,12 @@ export default function SettingLayout({children}:SettingLayoutProps){
         <div className="flex h-full overflow-hidden ">
             <SideBar menus={menus} menuTitle="Settings"/>
 
-            <div className="main-layout flex-1 flex flex-col relative overflow-y-scroll" >
-                <div className="ht-searchbar-status sticky top-0 z-40">
+            <div className="main-layout relative flex min-w-0 flex-1 flex-col overflow-hidden" >
+                <div className="ht-searchbar-status z-40 shrink-0">
                     <SearchStatusBar />
                 </div>
 
-                <div className="p-1">
+                <div className="min-h-0 flex-1 overflow-y-auto p-1">
                     {children}
                 </div>
             </div>
