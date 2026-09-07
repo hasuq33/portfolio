@@ -2,7 +2,7 @@
 
 import { FormEvent, useState } from "react";
 import Link from "next/link";
-import { Building2, CheckCircle2, Loader2, Mail, UserRound } from "lucide-react";
+import { CheckCircle2, Loader2, Mail, UserRound } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { AuthMessage, AuthPasswordField, AuthShell, AuthTextField } from "@/components/auth/AuthForm";
 import { apiFetch } from "@/lib/orm_service";
@@ -17,7 +17,6 @@ const initialForm = {
   name: "",
   email: "",
   login: "",
-  companyName: "",
   password: "",
   confirmPassword: "",
 };
@@ -41,7 +40,6 @@ export default function SignupPage() {
     if (!form.name.trim()) nextErrors.name = "Full name is required.";
     if (!isValidEmail(form.email.trim())) nextErrors.email = "Enter a valid email address.";
     if (!form.login.trim()) nextErrors.login = "Username is required.";
-    if (!form.companyName.trim()) nextErrors.companyName = "Company is required.";
     if (form.password.length < AUTH_PASSWORD_MIN_LENGTH) {
       nextErrors.password = `Password must be at least ${AUTH_PASSWORD_MIN_LENGTH} characters.`;
     }
@@ -97,7 +95,6 @@ export default function SignupPage() {
         <AuthTextField label="Full name" id="name" value={form.name} onChange={(event) => change("name", event.target.value)} autoComplete="name" autoFocus placeholder="Full name" error={errors.name} icon={<UserRound className="size-4 text-muted-foreground" />} />
         <AuthTextField label="Email address" id="email" type="email" value={form.email} onChange={(event) => change("email", event.target.value)} autoComplete="email" placeholder="name@example.com" error={errors.email} icon={<Mail className="size-4 text-muted-foreground" />} />
         <AuthTextField label="Username" id="signup-login" name="login" value={form.login} onChange={(event) => change("login", event.target.value)} autoComplete="username" placeholder="Username" error={errors.login} icon={<UserRound className="size-4 text-muted-foreground" />} />
-        <AuthTextField label="Company" id="companyName" value={form.companyName} onChange={(event) => change("companyName", event.target.value)} autoComplete="organization" placeholder="Company name" error={errors.companyName} icon={<Building2 className="size-4 text-muted-foreground" />} />
         <AuthPasswordField label="Password" id="signup-password" name="password" value={form.password} onChange={(event) => change("password", event.target.value)} autoComplete="new-password" placeholder={`At least ${AUTH_PASSWORD_MIN_LENGTH} characters`} error={errors.password} />
         <AuthPasswordField label="Confirm password" id="confirmPassword" value={form.confirmPassword} onChange={(event) => change("confirmPassword", event.target.value)} autoComplete="new-password" placeholder="Confirm password" error={errors.confirmPassword} />
         {apiError && <AuthMessage type="error">{apiError}</AuthMessage>}

@@ -17,6 +17,7 @@ import {
 } from "@/components/web/search-status-bar.types";
 import UserView, { UserRecord } from "./userView";
 import { UserFormView } from "./UserFormView";
+import { getCrudAccess } from "@/types/access";
 
 const userSearchConfig: ViewSearchConfig = {
   placeholder: "Search users...",
@@ -24,7 +25,6 @@ const userSearchConfig: ViewSearchConfig = {
     { name: "name", label: "Name" },
     { name: "login", label: "Login" },
     { name: "email", label: "Email" },
-    { name: "companyName", label: "Company" },
     { name: "phone", label: "Phone" },
     { name: "tags", label: "Tags" },
   ],
@@ -34,7 +34,7 @@ const userSearchConfig: ViewSearchConfig = {
   ],
   groupByOptions: [
     { value: "status", label: "Status" },
-    { value: "companyName", label: "Company" },
+    { value: "allowedToAllCompanies", label: "Company access" },
     { value: "isVerified", label: "Verification" },
   ],
   viewOptions: [
@@ -45,7 +45,7 @@ const userSearchConfig: ViewSearchConfig = {
 };
 
 const listFields = [
-  "_id", "login", "name", "hasAvatar", "email", "companyName", "phone",
+  "_id", "login", "name", "hasAvatar", "email", "companyIds", "groupIds", "allowedToAllCompanies", "phone",
   "status", "tags", "isVerified", "website", "joinedAt", "createdAt",
 ];
 
@@ -56,7 +56,9 @@ const newUser = (): UserRecord => ({
   avatar_image: null,
   hasAvatar: false,
   email: "",
-  companyName: "",
+  companyIds: [],
+  groupIds: [],
+  allowedToAllCompanies: false,
   phone: "",
   website: "",
   address: "",
@@ -111,6 +113,9 @@ const normalizeUser = (user: UserRecord, avatarVersion?: number): UserRecord => 
   status: user.status ?? "active",
   tags: user.tags ?? [],
   isVerified: user.isVerified ?? false,
+  companyIds: Array.isArray(user.companyIds) ? user.companyIds.map(String) : [],
+  groupIds: Array.isArray(user.groupIds) ? user.groupIds.map(String) : [],
+  allowedToAllCompanies: user.allowedToAllCompanies ?? false,
   password: "",
   joinedAt: user.joinedAt ? String(user.joinedAt).slice(0, 10) : "",
 });
@@ -123,7 +128,6 @@ const validateUser = (user: UserRecord, isNew: boolean) => {
   } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(user.email)) {
     errors.email = "Please enter a valid email address.";
   }
-  if (!user.companyName?.trim()) errors.companyName = "Company is required.";
   if (isNew && !user.password?.trim()) errors.password = "Password is required for a new user.";
   return errors;
 };
@@ -136,7 +140,12 @@ const focusFirstError = (errors: Record<string, string>) => {
 
 export function UsersWorkspace({ recordId, readonly = false }: UsersWorkspaceProps) {
   const router = useRouter();
-  const { user: currentUser, refreshUser } = useUser();
+  const { user: currentUser, loading: accessLoading, refreshUser } = useUser();
+  const permissions = getCrudAccess(currentUser?.access, "users");
+  const canRead = permissions.read;
+  const canCreate = permissions.create;
+  const canWrite = permissions.write;
+  const formReadonly = readonly || (recordId === "new" ? !canCreate : !canWrite);
   const { state: searchState, configure, reset } = useViewSearch();
   const debouncedQuery = useDebouncedValue(searchState.query, 300);
   const [users, setUsers] = useState<UserRecord[]>([]);
@@ -162,7 +171,10 @@ export function UsersWorkspace({ recordId, readonly = false }: UsersWorkspacePro
   }, [debouncedQuery, searchState.filters, searchState.searchField]);
 
   useEffect(() => {
-    if (recordId) return;
+    if (recordId || accessLoading || !canRead) {
+      if (!accessLoading && !canRead) setLoading(false);
+      return;
+    }
     let ignore = false;
 
     const loadUsers = async () => {
@@ -199,9 +211,10 @@ export function UsersWorkspace({ recordId, readonly = false }: UsersWorkspacePro
 
     void loadUsers();
     return () => { ignore = true; };
-  }, [debouncedQuery, limit, offset, recordId, searchState.filters, searchState.searchField]);
+  }, [accessLoading, canRead, debouncedQuery, limit, offset, recordId, searchState.filters, searchState.searchField]);
 
   useEffect(() => {
+    if (accessLoading) return;
     if (!recordId) {
       setFormData(null);
       setOriginalFormData(null);
@@ -209,6 +222,14 @@ export function UsersWorkspace({ recordId, readonly = false }: UsersWorkspacePro
       setFormLoading(false);
       setFieldErrors({});
       setFormError(undefined);
+      return;
+    }
+
+    if (!canRead || (recordId === "new" && !canCreate)) {
+      setFormData(null);
+      setOriginalFormData(null);
+      setRecordNavigation(null);
+      setFormLoading(false);
       return;
     }
 
@@ -245,7 +266,7 @@ export function UsersWorkspace({ recordId, readonly = false }: UsersWorkspacePro
 
     void loadUser();
     return () => { ignore = true; };
-  }, [recordId]);
+  }, [accessLoading, canCreate, canRead, recordId]);
 
   const formDirty = useMemo(
     () => Boolean(formData && originalFormData && JSON.stringify(formData) !== JSON.stringify(originalFormData)),
@@ -253,7 +274,7 @@ export function UsersWorkspace({ recordId, readonly = false }: UsersWorkspacePro
   );
 
   const saveUser = async () => {
-    if (!formData || readonly) return;
+    if (!formData || formReadonly) return;
     const validationErrors = validateUser(formData, recordId === "new");
     if (Object.keys(validationErrors).length > 0) {
       setFieldErrors(validationErrors);
@@ -360,6 +381,17 @@ export function UsersWorkspace({ recordId, readonly = false }: UsersWorkspacePro
     router.push(`/web/settings/users/${id}${readonly ? "?readonly=true" : ""}`);
   };
 
+  if (!accessLoading && (!canRead || (recordId === "new" && !canCreate))) {
+    return (
+      <main className="mx-auto w-full max-w-4xl p-6">
+        <div className="rounded-xl border border-dashed bg-card px-6 py-16 text-center">
+          <p className="font-medium">Access denied</p>
+          <p className="mt-1 text-sm text-muted-foreground">You do not have permission to open users.</p>
+        </div>
+      </main>
+    );
+  }
+
   if (recordId) {
     return (
       <main className="mx-auto w-full max-w-7xl p-3 sm:p-5 lg:p-6">
@@ -369,7 +401,7 @@ export function UsersWorkspace({ recordId, readonly = false }: UsersWorkspacePro
           <UserFormView
             user={formData}
             isNew={recordId === "new"}
-            readonly={readonly}
+            readonly={formReadonly}
             dirty={formDirty}
             saving={saving}
             errors={fieldErrors}
@@ -421,9 +453,11 @@ export function UsersWorkspace({ recordId, readonly = false }: UsersWorkspacePro
           <h1 className="text-2xl font-semibold tracking-tight">Users</h1>
           <p className="mt-1 text-sm text-muted-foreground">Manage people who can access your workspace.</p>
         </div>
-        <Button onClick={() => router.push("/web/settings/users/new")}>
-          <Plus /> New User
-        </Button>
+        {canCreate && (
+          <Button onClick={() => router.push("/web/settings/users/new")}>
+            <Plus /> New User
+          </Button>
+        )}
       </div>
 
       <UserView

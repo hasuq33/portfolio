@@ -31,7 +31,6 @@ describe('authentication DTOs', () => {
       name: 'Admin',
       email: 'not-an-email',
       login: 'admin',
-      companyName: 'My Company',
       password: 'short',
       confirmPassword: 'short',
     });

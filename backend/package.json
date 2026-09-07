@@ -4,6 +4,7 @@
   "description": "Harshiv Technogies Portal ",
   "author": "Harshiv Joshi",
   "private": true,
+  "engines": { "node": ">=22.12.0" },
   "license": "UNLICENSED",
   "scripts": {
     "build": "nest build",
@@ -33,7 +34,8 @@
     "mongoose": "^8.24.3",
     "nodemailer": "^9.0.5",
     "reflect-metadata": "^0.2.2",
-    "rxjs": "^7.8.1"
+    "rxjs": "^7.8.1",
+    "sanitize-html": "^2.17.7"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3.2.0",
@@ -47,6 +49,7 @@
     "@types/jest": "^30.0.0",
     "@types/node": "^22.10.7",
     "@types/nodemailer": "^8.0.1",
+    "@types/sanitize-html": "^2.16.1",
     "@types/supertest": "^6.0.2",
     "eslint": "^9.18.0",
     "eslint-config-prettier": "^10.0.1",
@@ -73,8 +76,10 @@
     "rootDir": "src",
     "testRegex": ".*\\.spec\\.ts$",
     "transform": {
-      "^.+\\.(t|j)s$": "ts-jest"
+      "^.+\\.ts$": "ts-jest",
+      "^.+\\.js$": "<rootDir>/../test/transform-esm.cjs"
     },
+    "transformIgnorePatterns": ["node_modules/(?!(htmlparser2|domhandler|domutils|domelementtype|dom-serializer|entities)/)"],
     "collectCoverageFrom": [
       "**/*.(t|j)s"
     ],

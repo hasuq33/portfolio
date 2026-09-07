@@ -14,21 +14,33 @@ import {
   MessageCircle
 } from "lucide-react";
 import { FaHandshakeSimple } from "react-icons/fa6";
+import { WEB_APP_MENU_ITEMS } from "@/config/navigation";
+import { useUser } from "@/context/UserContext";
 
-const apps = [
-  {name:"Chat",icon:MessageCircle,href:'/web/chat',accent: "from-red-400 to-orange-900"},
-  { name: "Dashboard", icon: LayoutGrid, href: "/web/dashboard/", accent: "from-blue-500 to-indigo-500" },
-  {name:"CRM",icon: FaHandshakeSimple,href:"/web/crm", accent: "from-teal-500 to-cyan-500" },
-  { name: "Sales", icon: ShoppingCart, href: "/web/sales", accent: "from-emerald-500 to-green-500" },
-  { name: "Projects", icon: FolderKanban, href: "/web/projects", accent: "from-purple-500 to-fuchsia-500" },
-  { name: "HR", icon: Users, href: "/web/hr", accent: "from-pink-500 to-rose-500" },
-  { name: "Blog", icon: FileText, href: "/web/blog", accent: "from-orange-500 to-amber-500" },
-  { name: "Settings", icon: Settings, href: "/web/settings", accent: "from-zinc-500 to-zinc-700" },
-];
+const appAppearance = {
+  chat: { icon: MessageCircle, accent: "from-red-400 to-orange-900" },
+  dashboard: { icon: LayoutGrid, accent: "from-blue-500 to-indigo-500" },
+  crm: { icon: FaHandshakeSimple, accent: "from-teal-500 to-cyan-500" },
+  sales: { icon: ShoppingCart, accent: "from-emerald-500 to-green-500" },
+  projects: { icon: FolderKanban, accent: "from-purple-500 to-fuchsia-500" },
+  hr: { icon: Users, accent: "from-pink-500 to-rose-500" },
+  blogs: { icon: FileText, accent: "from-orange-500 to-amber-500" },
+  settings: { icon: Settings, accent: "from-zinc-500 to-zinc-700" },
+};
+
+const apps = WEB_APP_MENU_ITEMS.map((item) => ({
+  ...item,
+  name: item.label,
+  ...appAppearance[item.key as keyof typeof appAppearance],
+}));
 
 export default function AppsGrid() {
   const gridRef = useRef<HTMLDivElement>(null);
   const router = useRouter();
+  const { user, loading } = useUser();
+  const visibleApps = apps.filter((app) =>
+    user?.access.menuItemIds.includes(app.key),
+  );
 
   /* ENTRY ANIMATION */
   useEffect(() => {
@@ -46,7 +58,11 @@ export default function AppsGrid() {
         stagger: 0.08,
       }
     );
-  }, []);
+  }, [loading]);
+
+  if (loading) {
+    return <div className="mx-auto mt-12 h-48 max-w-7xl animate-pulse rounded-2xl bg-muted/50" />;
+  }
 
   /* CURSOR GLASS REFLECTION */
   const handleMouseMove = (e: React.MouseEvent<HTMLAnchorElement>) => {
@@ -79,9 +95,9 @@ export default function AppsGrid() {
         ref={gridRef}
         className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-8"
       >
-        {apps.map((app) => (
+        {visibleApps.map((app) => (
           <Link
-            key={app.name}
+            key={app.key}
             href={app.href}
             onMouseMove={handleMouseMove}
             onClick={(e) => handleClick(e, app.href)}

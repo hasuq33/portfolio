@@ -25,7 +25,8 @@ export const TextWidget = ({
 
   return (
     <FieldShell field={field} appearance={appearance} density={density} error={error} disabled={disabled}>
-      <div className="relative">
+      <div className={cn("relative", field.prefix && "flex items-center gap-0")}>
+        {field.prefix && <span className="shrink-0 rounded-l-md border border-r-0 border-border/70 bg-muted/40 px-3 py-2.5 text-sm text-muted-foreground">{field.prefix}</span>}
         <input
           id={field.name}
           type={
@@ -51,6 +52,7 @@ export const TextWidget = ({
             fieldControlClassName,
             appearance === "form" ? (density === "compact" ? "min-h-9" : "min-h-11") : "min-h-10",
             isPassword && !readonly && "pr-11",
+            field.prefix && "min-w-0 rounded-l-none",
           )}
         />
         {isPassword && !readonly && (

@@ -25,11 +25,18 @@ describe('AuthController cookies', () => {
       name: 'Admin',
       login: 'admin',
       email: 'admin@example.com',
-      companyName: 'My Company',
+      companyIds: ['company-id'],
+      groupIds: ['group-id'],
+      allowedToAllCompanies: true,
       status: 'active',
       isVerified: false,
       hasAvatar: false,
       updatedAt: undefined,
+      access: {
+        menuItemIds: ['users'],
+        modelAccess: {},
+        currentCompanyId: null,
+      },
     },
   };
 

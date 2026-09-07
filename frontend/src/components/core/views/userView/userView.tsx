@@ -16,7 +16,9 @@ export interface UserRecord {
   avatar_image?: string | File | null;
   hasAvatar?: boolean;
   email: string;
-  companyName: string;
+  companyIds: string[];
+  groupIds: string[];
+  allowedToAllCompanies: boolean;
   phone?: string;
   address?: string;
   address2?: string;
@@ -47,6 +49,13 @@ interface UserViewProps {
 }
 
 const displayName = (user: UserRecord) => user.name?.trim() || user.login;
+
+const companyAccessLabel = (user: UserRecord) => {
+  if (user.allowedToAllCompanies) return "All companies";
+  const count = user.companyIds?.length ?? 0;
+  if (!count) return "No companies";
+  return `${count} ${count === 1 ? "company" : "companies"}`;
+};
 
 const StatusBadge = ({ status }: { status: UserRecord["status"] }) => (
   <span className={`inline-flex items-center rounded-full px-2.5 py-1 text-xs font-medium ${
@@ -99,8 +108,8 @@ const listColumns: ListColumn<UserRecord>[] = [
   },
   {
     id: "company",
-    label: "Company",
-    render: (user) => <span className="line-clamp-1 min-w-32">{user.companyName || "—"}</span>,
+    label: "Company access",
+    render: (user) => <span className="line-clamp-1 min-w-32">{companyAccessLabel(user)}</span>,
   },
   {
     id: "status",
@@ -131,7 +140,7 @@ const UserCard = ({ user }: { user: UserRecord }) => (
     </CardHeader>
     <CardContent className="space-y-3 px-5 pb-5">
       <div className="flex items-center gap-2 text-sm"><Mail className="size-4 shrink-0 text-muted-foreground" /><span className="truncate">{user.email}</span></div>
-      <div className="flex items-center gap-2 text-sm"><Building2 className="size-4 shrink-0 text-muted-foreground" /><span className="truncate">{user.companyName || "No company"}</span></div>
+      <div className="flex items-center gap-2 text-sm"><Building2 className="size-4 shrink-0 text-muted-foreground" /><span className="truncate">{companyAccessLabel(user)}</span></div>
       <div className="flex items-center gap-2 text-sm"><Phone className="size-4 shrink-0 text-muted-foreground" /><span className="truncate text-muted-foreground">{user.phone || "No phone number"}</span></div>
       {user.tags?.length > 0 && (
         <div className="flex flex-wrap gap-1.5 pt-1">
@@ -162,7 +171,11 @@ export default function UserView({
 
     return Array.from(grouped, ([key, records]) => ({
       key,
-      label: groupBy === "isVerified" ? (key === "true" ? "Verified" : "Not verified") : key,
+      label: groupBy === "isVerified"
+        ? (key === "true" ? "Verified" : "Not verified")
+        : groupBy === "allowedToAllCompanies"
+          ? (key === "true" ? "All companies" : "Selected companies")
+          : key,
       records,
     }));
   }, [groupBy, users]);
