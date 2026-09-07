@@ -16,6 +16,8 @@ import { FileInterceptor } from '@nestjs/platform-express';
 import type { Response } from 'express';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { UsersService } from './users.service';
+import { ModelAccessGuard } from '../access/model-access.guard';
+import { RequireModelAccess } from '../access/require-model-access.decorator';
 
 @UseGuards(JwtAuthGuard)
 @Controller('users')
@@ -23,6 +25,8 @@ export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
   @Get(':id')
+  @UseGuards(ModelAccessGuard)
+  @RequireModelAccess('users', 'read')
   findById(@Param('id') id: string) {
     return this.usersService.findById(id);
   }
@@ -37,6 +41,8 @@ export class UsersController {
   }
 
   @Put(':id/avatar')
+  @UseGuards(ModelAccessGuard)
+  @RequireModelAccess('users', 'write')
   @UseInterceptors(
     FileInterceptor('file', {
       limits: { fileSize: 2 * 1024 * 1024 },
@@ -51,21 +57,29 @@ export class UsersController {
   }
 
   @Delete(':id/avatar')
+  @UseGuards(ModelAccessGuard)
+  @RequireModelAccess('users', 'write')
   deleteAvatar(@Param('id') id: string) {
     return this.usersService.deleteAvatar(id);
   }
 
   @Get(':id/navigation')
+  @UseGuards(ModelAccessGuard)
+  @RequireModelAccess('users', 'read')
   getNavigation(@Param('id') id: string) {
     return this.usersService.getNavigation(id);
   }
 
   @Post()
+  @UseGuards(ModelAccessGuard)
+  @RequireModelAccess('users', 'create')
   create(@Body() data: Record<string, any>) {
     return this.usersService.create(data);
   }
 
   @Put(':id')
+  @UseGuards(ModelAccessGuard)
+  @RequireModelAccess('users', 'write')
   update(@Param('id') id: string, @Body() data: Record<string, any>) {
     return this.usersService.update(id, data);
   }

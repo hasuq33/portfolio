@@ -31,12 +31,6 @@ export class SignupDto {
   @MaxLength(80)
   login!: string;
 
-  @Transform(trim)
-  @IsString()
-  @IsNotEmpty()
-  @MaxLength(160)
-  companyName!: string;
-
   @IsString()
   @MinLength(PASSWORD_MIN_LENGTH)
   @MaxLength(128)

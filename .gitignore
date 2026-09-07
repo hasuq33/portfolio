@@ -1,0 +1,67 @@
+# =========================================================================
+# VS Code Settings & Workspace Layout
+# =========================================================================
+.vscode/*
+!.vscode/extensions.json
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+
+# Local history extensions
+.history/
+*.log
+
+# =========================================================================
+# AI / Coding Agents & LLM Context Rules
+# =========================================================================
+# Exclude scratchpads, prompt files, and agent logs
+.agent/
+.copilot/
+*agent*.log
+*chat*.json
+.aider*
+.cursorignore
+
+# Prevent agents from reading huge binary context dumps
+.llm-context/
+ai-prompts/local/
+
+# =========================================================================
+# Operating System & Environment Secrets (Crucial for AI Safety)
+# =========================================================================
+.env
+.env.*
+!.env.example
+.direnv/
+.secrets
+*.pem
+*.key
+
+# macOS / Windows System Files
+.DS_Store
+Thumbs.db
+
+# =========================================================================
+# Common Language Dependencies & Build Artifacts (Keeps AI searches fast)
+# =========================================================================
+node_modules/
+jspm_packages/
+web_modules/
+.npm/
+.yarn/
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+.venv/
+env/
+venv/
+ENV/
+
+# Build and Output
+dist/
+build/
+out/
+.next/
+.nuxt/

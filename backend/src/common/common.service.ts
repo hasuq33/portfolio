@@ -5,10 +5,11 @@ import {
 } from '@nestjs/common';
 import { InjectConnection } from '@nestjs/mongoose';
 import { Connection, Model, SortOrder } from 'mongoose';
+import { BlogsService } from '../blogs/blogs.service';
 
 @Injectable()
 export class CommonService {
-  constructor(@InjectConnection() private readonly connection: Connection) {}
+  constructor(@InjectConnection() private readonly connection: Connection, private readonly blogsService: BlogsService) {}
 
   private getModel(modelName: string): Model<any> {
     const model = this.connection.model(modelName);
@@ -18,7 +19,8 @@ export class CommonService {
     return model;
   }
 
-  async create(modelName: string, data: any) {
+  async create(modelName: string, data: any, userId?: string) {
+    if (modelName === 'Blogs' || modelName === 'BlogCategory') return this.blogsService.create(modelName, data, userId);
     if (modelName === 'User') {
       throw new BadRequestException(
         'Use the protected users endpoint to create users.',
@@ -49,9 +51,10 @@ export class CommonService {
   }
 
   async update(modelName: string, id: string, data: any) {
-    if (modelName === 'User' && 'password' in data) {
+    if (modelName === 'Blogs' || modelName === 'BlogCategory') return this.blogsService.update(modelName, id, data);
+    if (modelName === 'User') {
       throw new BadRequestException(
-        'Use the protected users endpoint to change a password.',
+        'Use the protected users endpoint to update users.',
       );
     }
     const model = this.getModel(modelName);
@@ -231,6 +234,7 @@ export class CommonService {
       query.select(safeFields.join(' '));
     }
 
+    if (modelName === 'Blogs') query.populate('categoryId', 'name slug active');
     query.sort(sort).skip(offset).limit(limit);
     if (!withCount) return query.exec();
 

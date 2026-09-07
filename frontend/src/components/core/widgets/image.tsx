@@ -191,8 +191,8 @@ export const ImageWidget = ({ field, value, onChange, readonly, disabled, error,
     <div className="min-w-0 text-xs leading-relaxed text-muted-foreground">
       <p className="font-medium text-foreground/75">
         {previewUrl
-          ? "Change profile image"
-          : "Add profile image"}
+          ? `Change ${field.label.toLowerCase()}`
+          : `Add ${field.label.toLowerCase()}`}
       </p>
 
       <p className="mt-0.5">

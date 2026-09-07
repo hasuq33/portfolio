@@ -6,10 +6,13 @@ import {
   Param,
   Body,
   Logger,
+  Req,
 } from '@nestjs/common';
 import { CommonService } from './common.service';
 import { UseGuards } from '@nestjs/common';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
+import { ModelAccessGuard } from '../access/model-access.guard';
+import { RequireModelParamAccess } from '../access/require-model-access.decorator';
 
 // Common API Model Sharable which Can be Scallable by Model and Need to find the Data by accessrigght
 /**
@@ -18,19 +21,21 @@ import { JwtAuthGuard } from '../auth/jwt-auth.guard';
  *
  * Web Request ---> Authentication middleware --> Check Group --> Fetch Data
  */
-@UseGuards(JwtAuthGuard)
+@UseGuards(JwtAuthGuard, ModelAccessGuard)
 @Controller('api/:model')
 export class CommonController {
   constructor(private readonly commonService: CommonService) {}
   private readonly logger = new Logger(CommonController.name);
 
   @Post()
-  async create(@Param('model') model: string, @Body() data: any) {
+  @RequireModelParamAccess('model', 'create')
+  async create(@Param('model') model: string, @Body() data: any, @Req() request: { user: { _id: unknown } }) {
     this.logger.log(`api/${model}`);
-    return this.commonService.create(model, data);
+    return this.commonService.create(model, data, String(request.user._id));
   }
 
   @Post('search')
+  @RequireModelParamAccess('model', 'read')
   async searchRead(
     @Param('model') model: string,
     @Body()
@@ -52,12 +57,14 @@ export class CommonController {
   }
 
   @Post('read')
+  @RequireModelParamAccess('model', 'read')
   async read(@Param('model') model: string, @Body('id') id: string) {
     this.logger.log(`READ api/${model}/${id}`);
     return this.commonService.findById(model, id);
   }
 
   @Put(':id')
+  @RequireModelParamAccess('model', 'write')
   async update(
     @Param('model') model: string,
     @Param('id') id: string,
@@ -67,6 +74,7 @@ export class CommonController {
   }
 
   @Delete(':id')
+  @RequireModelParamAccess('model', 'delete')
   async delete(@Param('model') model: string, @Param('id') id: string) {
     return this.commonService.delete(model, id);
   }

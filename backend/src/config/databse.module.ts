@@ -8,7 +8,12 @@ import {
   TagsSchema,
   BlogsSchema,
   IRConfigSchema,
+  CompanySchema,
+  GroupSchema,
 } from '../schemas';
+import { CompanySeeder } from '../seeder/company.seeder';
+import { UserSeeder } from '../seeder/user.seeder';
+import { GroupSeeder } from '../seeder/group.seeder';
 @Module({
   imports: [
     MongooseModule.forRootAsync({
@@ -25,8 +30,11 @@ import {
       { name: 'Tags', schema: TagsSchema },
       { name: 'Blogs', schema: BlogsSchema },
       { name: 'ir.configuration', schema: IRConfigSchema },
+      { name: 'Company', schema: CompanySchema },
+      { name: 'Group', schema: GroupSchema },
     ]),
   ],
+  providers: [CompanySeeder, GroupSeeder, UserSeeder],
   exports: [MongooseModule],
 })
 export class DatabaseModule {}

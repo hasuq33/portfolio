@@ -7,6 +7,7 @@ import { MongooseExceptionFilter } from './common/filters/mongoose-exception.fil
 import { APP_FILTER } from '@nestjs/core';
 import { UsersModule } from './users/users.module';
 import { validateEnvironment } from './config/environment.validation';
+import { AccessModule } from './access/access.module';
 
 @Module({
   imports: [
@@ -14,6 +15,7 @@ import { validateEnvironment } from './config/environment.validation';
       isGlobal: true,
       validate: validateEnvironment,
     }),
+    AccessModule,
     AuthModule,
     CommonModule,
     DatabaseModule,

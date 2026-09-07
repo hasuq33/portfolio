@@ -9,6 +9,7 @@ import { useUser } from "@/context/UserContext";
 import { ThemeToggler } from "../ThemeToggler";
 
 interface SidebarItem {
+  key: string;
   sequence: number;
   name: string;
   icon: React.ReactNode;
@@ -47,6 +48,10 @@ const SideBar: React.FC<SideBarProps> = ({
 
   if(!user) return
 
+  const visibleMenus = menus.filter((menu) =>
+    user.access.menuItemIds.includes(menu.key),
+  );
+
   return (
     <aside
       className={`
@@ -83,10 +88,10 @@ const SideBar: React.FC<SideBarProps> = ({
 
         <div className="flex flex-col gap-y-2">
 
-          {menus.map((menu, index) => (
+          {visibleMenus.map((menu) => (
 
             <Link
-              key={index}
+              key={menu.href ?? menu.key}
               href={menu.href || '#'}
               className={`
                 flex items-center gap-3

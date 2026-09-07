@@ -3,6 +3,19 @@ export interface ConfigOption {
   value: string;
 }
 
+export interface ConfigRelation {
+  model: string;
+  labelField: string;
+  recordLabel?: string;
+  recordLabelPlural?: string;
+  valueField?: string;
+  secondaryField?: string;
+  searchFields?: string[];
+  domain?: Array<[field: string, operator: string, value: unknown]>;
+  order?: string;
+  limit?: number;
+}
+
 export interface ConfigField {
   name: string;
   label: string;
@@ -11,16 +24,26 @@ export interface ConfigField {
     | 'email'
     | 'password'
     | 'textarea'
+    | 'html'
     | 'image'
+    | 'cover-image'
+    | 'toggle'
     | 'switch'
     | 'select'
     | 'color'
     | 'url'
     | 'tel'
     | 'date'
-    | 'tags';
+    | 'tags'
+    | 'many2many'
+    | 'multi-select'
+    | 'access-rights';
 
   placeholder?: string;
+  prefix?: string;
+  emptyLabel?: string;
+  trueLabel?: string;
+  falseLabel?: string;
   required?: boolean;
   readonly?: boolean;
   disabled?: boolean;
@@ -33,6 +56,8 @@ export interface ConfigField {
   imageFallback?: string;
   imageColorClassName?: string;
   options?: ConfigOption[];
+  relation?: ConfigRelation;
+  accessModels?: ConfigOption[];
 }
 
 export interface ConfigSection {

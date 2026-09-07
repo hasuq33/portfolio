@@ -46,6 +46,13 @@ describe('AuthService', () => {
     getOrThrow: jest.fn((name: string) => configValues[name]),
   };
   const mailService = { sendPasswordResetEmail: jest.fn() };
+  const accessService = {
+    resolveUserAccess: jest.fn().mockResolvedValue({
+      menuItemIds: [],
+      modelAccess: {},
+      currentCompanyId: null,
+    }),
+  };
   let service: AuthService;
 
   beforeEach(() => {
@@ -56,6 +63,7 @@ describe('AuthService', () => {
       jwtService as never,
       configService as never,
       mailService as never,
+      accessService as never,
     );
   });
 
@@ -69,7 +77,8 @@ describe('AuthService', () => {
         _id: new Types.ObjectId(),
         login: 'admin',
         email: 'admin@example.com',
-        companyName: 'My Company',
+        companyIds: [new Types.ObjectId()],
+        allowedToAllCompanies: true,
         password: await bcrypt.hash('password123', 4),
         status: 'active',
         authVersion: 0,
@@ -158,7 +167,6 @@ describe('AuthService', () => {
         name: 'Admin',
         email: 'admin@example.com',
         login: 'admin',
-        companyName: 'My Company',
         password: 'password123',
         confirmPassword: 'different123',
       }),
@@ -172,7 +180,9 @@ describe('AuthService', () => {
       name: 'Admin',
       email: 'admin@example.com',
       login: 'admin',
-      companyName: 'My Company',
+      companyIds: [],
+      groupIds: [],
+      allowedToAllCompanies: false,
       status: 'active',
       isVerified: false,
     };
@@ -182,7 +192,6 @@ describe('AuthService', () => {
       name: 'Admin',
       email: 'ADMIN@example.com',
       login: 'ADMIN',
-      companyName: 'My Company',
       password: 'password123',
       confirmPassword: 'password123',
       roles: ['admin'],
@@ -194,6 +203,9 @@ describe('AuthService', () => {
         login: 'admin',
         status: 'active',
         isVerified: false,
+        companyIds: [],
+        groupIds: [],
+        allowedToAllCompanies: false,
       }),
     );
     expect(userModel.create.mock.calls[0][0]).not.toHaveProperty('roles');

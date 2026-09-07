@@ -21,6 +21,7 @@ import {
   GENERIC_PASSWORD_RESET_MESSAGE,
   durationToMilliseconds,
 } from './auth.constants';
+import { AccessService, EffectiveAccess } from '../access/access.service';
 
 interface AuthTokenPayload {
   sub: string;
@@ -37,7 +38,22 @@ export interface AuthTokens {
   accessMaxAgeMs: number;
   refreshMaxAgeMs: number;
   rememberMe: boolean;
-  user: ReturnType<AuthService['toSafeUser']>;
+  user: SafeUser;
+}
+
+export interface SafeUser {
+  _id: string;
+  name?: string;
+  login?: string;
+  email?: string;
+  companyIds: string[];
+  groupIds: string[];
+  allowedToAllCompanies: boolean;
+  status?: 'active' | 'inactive';
+  isVerified?: boolean;
+  hasAvatar?: boolean;
+  updatedAt?: Date;
+  access: EffectiveAccess;
 }
 
 @Injectable()
@@ -55,6 +71,7 @@ export class AuthService {
     private readonly jwtService: JwtService,
     private readonly configService: ConfigService,
     private readonly mailService: MailService,
+    private readonly accessService: AccessService,
   ) {}
 
   async signup(data: SignupDto) {
@@ -76,7 +93,9 @@ export class AuthService {
       name: data.name.trim(),
       email: data.email.trim().toLowerCase(),
       login: data.login.trim().toLowerCase(),
-      companyName: data.companyName.trim(),
+      companyIds: [],
+      groupIds: [],
+      allowedToAllCompanies: false,
       password: await bcrypt.hash(data.password, 10),
       status: 'active',
       isVerified: false,
@@ -85,7 +104,7 @@ export class AuthService {
 
     return {
       message: 'Account created successfully. You can now log in.',
-      user: this.toSafeUser(user),
+      user: await this.toSafeUser(user),
     };
   }
 
@@ -192,7 +211,7 @@ export class AuthService {
     return user;
   }
 
-  getCurrentUser(user: HydratedDocument<User>) {
+  async getCurrentUser(user: HydratedDocument<User>) {
     return this.toSafeUser(user);
   }
 
@@ -360,7 +379,7 @@ export class AuthService {
       accessMaxAgeMs: durationToMilliseconds(accessExpiresIn),
       refreshMaxAgeMs: durationToMilliseconds(refreshExpiresIn),
       rememberMe,
-      user: this.toSafeUser(user),
+      user: await this.toSafeUser(user),
     };
   }
 
@@ -406,18 +425,21 @@ export class AuthService {
     return value;
   }
 
-  private toSafeUser(user: HydratedDocument<User>) {
+  private async toSafeUser(user: HydratedDocument<User>): Promise<SafeUser> {
     return {
       _id: String(user._id),
       name: user.name,
       login: user.login,
       email: user.email,
-      companyName: user.companyName,
+      companyIds: (user.companyIds ?? []).map((companyId) => String(companyId)),
+      groupIds: (user.groupIds ?? []).map((groupId) => String(groupId)),
+      allowedToAllCompanies: user.allowedToAllCompanies ?? false,
       status: user.status,
       isVerified: user.isVerified,
       hasAvatar: user.hasAvatar,
       updatedAt: (user as HydratedDocument<User> & { updatedAt?: Date })
         .updatedAt,
+      access: await this.accessService.resolveUserAccess(user),
     };
   }
 }

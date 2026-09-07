@@ -2,8 +2,9 @@
 
 import SideBar from "@/components/web/SideBar";
 import { ReactNode } from "react";
-import { FiSettings, FiUser } from "react-icons/fi";
+import { FiBriefcase, FiSettings, FiUser, FiUsers } from "react-icons/fi";
 import { SearchStatusBar } from "@/components/web/SearchStatusBar";
+import { SETTINGS_MENU_ITEMS } from "@/config/navigation";
 
 interface SettingLayoutProps {
     children: ReactNode
@@ -11,20 +12,19 @@ interface SettingLayoutProps {
 
 export default function SettingLayout({children}:SettingLayoutProps){
 
-    const menus = [
-        {
-            sequence: 1,
-            name: "Settings",
-            href: "/web/settings",
-            icon: <FiSettings />
-        },
-        {
-            sequence: 2,
-            name: "Users",
-            href: "/web/settings/users",
-            icon: <FiUser />
-        }
-    ];
+    const icons = {
+        settings: <FiSettings />,
+        users: <FiUser />,
+        companies: <FiBriefcase />,
+        groups: <FiUsers />,
+    };
+    const menus = SETTINGS_MENU_ITEMS.map((menu, index) => ({
+        key: menu.key,
+        sequence: index + 1,
+        name: menu.label,
+        href: menu.href,
+        icon: icons[menu.key as keyof typeof icons],
+    }));
 
 
     return (

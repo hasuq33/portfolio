@@ -1,5 +1,5 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { Types } from 'mongoose';
+import mongoose, { Types } from 'mongoose';
 
 @Schema({ timestamps: true, collection: 'users' })
 export class User {
@@ -27,8 +27,20 @@ export class User {
   @Prop({ required: true, unique: true, lowercase: true, trim: true })
   email?: string;
 
-  @Prop({ required: true, trim: true })
-  companyName?: string;
+  @Prop({
+    type: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Company' }],
+    default: [],
+  })
+  companyIds!: Types.ObjectId[];
+
+  @Prop({
+    type: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Group' }],
+    default: [],
+  })
+  groupIds!: Types.ObjectId[];
+
+  @Prop({ type: Boolean, default: false })
+  allowedToAllCompanies!: boolean;
 
   @Prop({ trim: true })
   phone?: string;

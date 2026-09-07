@@ -2,13 +2,17 @@
 
 import { createContext, useCallback, useContext, useEffect, useState } from "react";
 import { apiFetch } from "@/lib/orm_service";
+import type { EffectiveAccess } from "@/types/access";
 
 export type CurrentUser = {
   _id: string;
   name?: string;
   email: string;
   role?: string;
-  companyName: string;
+  companyIds: string[];
+  groupIds: string[];
+  allowedToAllCompanies: boolean;
+  access: EffectiveAccess;
   login: string;
   hasAvatar?: boolean;
   updatedAt?: string;
