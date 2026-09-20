@@ -3,7 +3,11 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { ThemeToggler } from "@/components/ThemeToggler";
 import { MobileHeadar } from "@/components/HeadrMobile";
-const Header = () => {
+
+const Header = ({hasSession}: {hasSession:Boolean}) => {
+
+
+  
   const [scrolled, setScrolled] = useState(false);
   useEffect(() => {
     const handleScroll = () => {
@@ -15,6 +19,8 @@ const Header = () => {
       window.removeEventListener("scroll", handleScroll)
     }
   }, [])
+
+
   return (
     <header className={`w-[100%] z-50 fixed transition-all duration-[1s] ${scrolled ? "fixed top-0 left-0 right-0 shadow-lg bg-white/60 dark:bg-gray-900/80 backdrop-blur-lg border-b border-gray-200 dark:border-gray-700" : "bg-transparent"
       }`} >
@@ -37,7 +43,11 @@ const Header = () => {
               <span className="header_absolute_span" />
             </li>
           </ul>
-          <Link className="header-light-login hidden lg:flex" href="/web/login">Login</Link>
+          {
+            !hasSession ?
+          <Link className="header-light-login hidden lg:flex" href={'/web/ogin'}>
+          Login</Link>:<a className="header-light-login hidden lg:flex" href="/web">Dashboard</a>
+          }
           <MobileHeadar />
           <ThemeToggler propsClass={`hidden lg:flex`} />
         </div>

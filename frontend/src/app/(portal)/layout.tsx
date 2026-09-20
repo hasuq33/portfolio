@@ -5,6 +5,14 @@ import NextTopLoader from "nextjs-toploader";
 import "./global.css"
 import { UserProvider } from "@/context/UserContext";
 import { ViewSearchProvider } from "@/context/ViewSearchContext";
+import { Poppins } from "next/font/google";
+
+const poppins = Poppins({
+  weight: ['400', '700'], 
+  subsets: ['latin'], 
+  variable: '--font-poppins', 
+  display: 'swap',
+})
 
 export default async function PortalLayout({children,}: {children: React.ReactNode;}) {
  const cookieStore = await cookies(); 
@@ -15,8 +23,8 @@ export default async function PortalLayout({children,}: {children: React.ReactNo
   }
 
   return (
-    <html lang="en" suppressHydrationWarning={true}>
-      <body >
+    <html lang="en" suppressHydrationWarning={true} className={`dark ${poppins.variable}`}>
+      <body className="overflow-hidden">
         <ThemeProvider
             attribute="class"
             defaultTheme="light"

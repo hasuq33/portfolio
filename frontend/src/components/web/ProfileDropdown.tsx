@@ -11,10 +11,11 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { User, Settings, LifeBuoy, LogOut } from "lucide-react";
+import { User, Settings, LifeBuoy, LogOut , GlobeIcon } from "lucide-react";
 import { apiFetch } from "@/lib/orm_service";
 import { getUserAvatarColor, getUserAvatarUrl, getUserInitial } from "@/lib/user-avatar";
 import type { CurrentUser } from "@/context/UserContext";
+import Link from "next/link";
 
 type ProfileDropdownProps = {
   user?: CurrentUser;
@@ -116,6 +117,21 @@ const ProfileDropdown = ({ user , Class }: ProfileDropdownProps) => {
         >
           <LifeBuoy className="text-black dark:text-white" size={16} />
           Support
+        </DropdownMenuItem>
+
+        <DropdownMenuSeparator />
+
+        <DropdownMenuItem
+          className="
+            gap-2 cursor-pointer
+            hover:bg-muted/50
+            dark:hover:bg-muted/40
+          "
+        >
+          <a href={'/'} className="flex flex-row gap-2">
+            <GlobeIcon className="text-black dark:text-white" size={16} />
+            Go to Website
+          </a>
         </DropdownMenuItem>
 
         <DropdownMenuSeparator />
