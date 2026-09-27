@@ -8,6 +8,7 @@ import { APP_FILTER } from '@nestjs/core';
 import { UsersModule } from './users/users.module';
 import { validateEnvironment } from './config/environment.validation';
 import { AccessModule } from './access/access.module';
+import { AttachmentsModule } from './attachments/attachments.module';
 
 @Module({
   imports: [
@@ -15,6 +16,7 @@ import { AccessModule } from './access/access.module';
       isGlobal: true,
       validate: validateEnvironment,
     }),
+    AttachmentsModule,
     AccessModule,
     AuthModule,
     CommonModule,

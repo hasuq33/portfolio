@@ -61,6 +61,7 @@ export function ManyToManyWidget({
   const [loadError, setLoadError] = useState<string>();
 
   const model = relation?.model ?? "";
+  const apiBase = relation?.apiBase ?? `/api/${model}`;
   const labelField = relation?.labelField ?? "name";
   const recordLabel = relation?.recordLabel ?? "record";
   const recordLabelPlural = relation?.recordLabelPlural ?? `${recordLabel}s`;
@@ -91,7 +92,7 @@ export function ManyToManyWidget({
 
     const loadSelectedRecords = async () => {
       const response = await apiFetch({
-        url: `/api/${model}/search`,
+        url: `${apiBase}/search`,
         method: "POST",
         headers: { "Content-Type": "application/json" },
         payload: JSON.stringify({
@@ -108,7 +109,7 @@ export function ManyToManyWidget({
 
     void loadSelectedRecords();
     return () => { ignore = true; };
-  }, [model, responseFields, selectedKey, valueField]);
+  }, [apiBase, model, responseFields, selectedKey, valueField]);
 
   useEffect(() => {
     if (!open || !model) return;
@@ -119,7 +120,7 @@ export function ManyToManyWidget({
       setLoadError(undefined);
       const searchFields = searchFieldsKey.split(",").filter(Boolean);
       const response = await apiFetch({
-        url: `/api/${model}/search`,
+        url: `${apiBase}/search`,
         method: "POST",
         headers: { "Content-Type": "application/json" },
         payload: JSON.stringify({
@@ -146,7 +147,7 @@ export function ManyToManyWidget({
 
     void loadOptions();
     return () => { ignore = true; };
-  }, [debouncedQuery, domainKey, limit, model, open, order, recordLabelPlural, responseFields, searchFieldsKey]);
+  }, [apiBase, debouncedQuery, domainKey, limit, model, open, order, recordLabelPlural, responseFields, searchFieldsKey]);
 
   if (!relation) {
     return (
@@ -278,6 +279,7 @@ export function ManyToManyWidget({
           </Dialog>
         )}
       </div>
+      {relation.manageHref && <a href={relation.manageHref} target="_blank" rel="noopener noreferrer" className="mt-1 inline-block text-xs text-muted-foreground underline">Manage {field.label.toLowerCase()} (new tab)</a>}
     </FieldShell>
   );
 }

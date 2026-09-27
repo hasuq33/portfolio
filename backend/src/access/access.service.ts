@@ -39,6 +39,24 @@ export class AccessService {
     return MODEL_NAME_TO_ACCESS_KEY[modelName];
   }
 
+  /** Companies where both membership and the requested group permission apply. */
+  async permittedCompanyIds(user: HydratedDocument<User>, modelKey: ModelAccessKey,
+    permission: ModelPermission, currentCompanyId?: string): Promise<Types.ObjectId[]> {
+    const selected = this.assertCompanyContext(user, currentCompanyId);
+    const groups = await this.groupModel.find({ _id: { $in: user.groupIds ?? [] }, active: true })
+      .select('companyIds modelAccess').lean().exec();
+    const membership = new Set((user.companyIds ?? []).map(String));
+    const ids = new Set<string>();
+    for (const group of groups) {
+      if (!(group.modelAccess ?? []).some(entry => entry.model === modelKey && entry[permission])) continue;
+      for (const company of group.companyIds ?? []) {
+        const id = String(company);
+        if ((!selected || selected === id) && (user.allowedToAllCompanies || membership.has(id))) ids.add(id);
+      }
+    }
+    return [...ids].map(id => new Types.ObjectId(id));
+  }
+
   async resolveUserAccess(
     user: HydratedDocument<User>,
     currentCompanyId?: string,

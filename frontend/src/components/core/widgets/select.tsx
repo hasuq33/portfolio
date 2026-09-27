@@ -18,25 +18,26 @@ import type { ConfigOption } from "@/components/types/config";
 export const SelectWidget = ({ field, value, onChange, readonly, disabled, error, density = "comfortable", appearance }: WidgetProps) => {
   const [relationOptions, setRelationOptions] = useState<ConfigOption[]>([]);
   const [relationError, setRelationError] = useState<string>();
+  const [reloadChoices, setReloadChoices] = useState(0);
   useEffect(() => {
     if (!field.relation) return;
     let cancelled = false;
     const relation = field.relation;
     void (async () => {
-      const response = await apiFetch({ url: `/api/${relation.model}/search`, method: "POST", headers: { "Content-Type": "application/json" },
+      const response = await apiFetch({ url: `${relation.apiBase ?? `/api/${relation.model}`}/search`, method: "POST", headers: { "Content-Type": "application/json" },
         payload: JSON.stringify({ domain: relation.domain ?? [], fields: ["_id", relation.labelField], order: relation.order ?? `${relation.labelField} asc`, limit: 200 }), suppressGlobalError: true });
       if (!response?.ok) { if (!cancelled) setRelationError("Choices could not be loaded."); return; }
       const records = await response.json() as Array<Record<string, unknown>>;
       const options = records.map(record => ({ value: String(record._id), label: String(record[relation.labelField]) }));
       if (value && !options.some(option => option.value === value)) {
-        const existing = await apiFetch({ url: `/api/${relation.model}/read`, method: "POST", headers: { "Content-Type": "application/json" }, payload: JSON.stringify({ id: value }), suppressGlobalError: true });
-        if (existing?.ok) { const record = await existing.json(); options.push({ value: String(value), label: `${record[relation.labelField]}${record.active === false ? " (inactive)" : ""}` }); }
+        const existing = await apiFetch({ url: `${relation.apiBase ?? `/api/${relation.model}`}/read`, method: "POST", headers: { "Content-Type": "application/json" }, payload: JSON.stringify({ id: value }), suppressGlobalError: true });
+        if (existing?.ok) { const record = await existing.json(); options.push({ value: String(value), label: record ? `${record[relation.labelField]}${record.active === false ? " (inactive)" : ""}` : "Unavailable record" }); }
         else options.push({ value: String(value), label: "Unavailable record" });
       }
       if (!cancelled) { setRelationOptions(options); setRelationError(undefined); }
     })();
     return () => { cancelled = true; };
-  }, [field.relation, value]);
+  }, [field.relation, value, reloadChoices]);
   const options = field.relation ? relationOptions : field.options;
   return (
   <FieldShell field={field} appearance={appearance} density={density} error={error || relationError} disabled={disabled}>
@@ -65,6 +66,10 @@ export const SelectWidget = ({ field, value, onChange, readonly, disabled, error
         </SelectGroup>
       </SelectContent>
     </Select>
+    {field.relation?.manageHref && <div className="mt-1 flex flex-wrap gap-3 text-xs text-muted-foreground">
+      <a href={field.relation.manageHref} target="_blank" rel="noopener noreferrer" className="underline">Manage {field.label.toLowerCase()} (new tab)</a>
+      <button type="button" className="cursor-pointer underline" onClick={() => setReloadChoices(value => value + 1)}>Refresh choices</button>
+    </div>}
   </FieldShell>
   );
 };

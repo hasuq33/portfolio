@@ -14,6 +14,11 @@ export const MENU_ITEMS = [
 
 export type MenuItemKey = (typeof MENU_ITEMS)[number]["key"];
 
+export const CRM_MENU_ITEMS = [
+  { label: "Leads", href: "/web/crm/leads" },
+  { label: "Opportunities", href: "/web/crm/opportunities" },
+] as const;
+
 const menuKeys = <TKey extends MenuItemKey>(keys: readonly TKey[]) =>
   keys.map((key) => MENU_ITEMS.find((item) => item.key === key)!);
 
@@ -45,7 +50,7 @@ export const MODEL_ACCESS_OPTIONS = [
   { value: "companies", label: "Companies" },
   { value: "groups", label: "Groups" },
   { value: "partners", label: "Partners" },
-  { value: "leads", label: "Leads" },
+  { value: "leads", label: "CRM (Leads & Opportunities)" },
   { value: "tags", label: "Tags" },
   { value: "blogs", label: "Blogs" },
   { value: "settings", label: "Settings" },

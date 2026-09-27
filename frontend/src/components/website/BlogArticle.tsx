@@ -1,6 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import type { Metadata } from "next";
+import "@/components/core/widgets/editor/rich-content.css";
 import { publicBlogImage, publicBlogPath, type PublicBlog } from "@/lib/public-blogs";
 
 export function blogMetadata(blog: PublicBlog, origin?: string): Metadata {
@@ -28,7 +29,7 @@ export function BlogArticle({ blog }: { blog: PublicBlog }) {
       {blog.hasCoverImage && <div className="relative mt-8 aspect-[16/9] overflow-hidden rounded-xl">
         <Image src={publicBlogImage(blog)} alt={blog.title} fill sizes="(max-width: 768px) 100vw, 896px" className="object-cover" priority />
       </div>}
-      <div className="mt-10 break-words text-base leading-8 text-gray-800 dark:text-gray-200 [&_h2]:mb-4 [&_h2]:mt-10 [&_h2]:text-2xl [&_h2]:font-bold [&_h3]:mb-3 [&_h3]:mt-8 [&_h3]:text-xl [&_h3]:font-semibold [&_p]:my-5 [&_a]:text-blue-600 [&_a]:underline dark:[&_a]:text-blue-400 [&_ul]:my-5 [&_ul]:list-disc [&_ul]:pl-6 [&_ol]:my-5 [&_ol]:list-decimal [&_ol]:pl-6 [&_pre]:overflow-x-auto [&_pre]:rounded-lg [&_pre]:bg-gray-200 [&_pre]:p-4 dark:[&_pre]:bg-gray-800 [&_blockquote]:border-l-4 [&_blockquote]:border-blue-500 [&_blockquote]:pl-5 [&_img]:h-auto [&_img]:max-w-full [&_table]:block [&_table]:overflow-x-auto [&_td]:border [&_td]:p-3 [&_th]:border [&_th]:p-3"
+      <div className="rich-content mt-10"
         dangerouslySetInnerHTML={{ __html: blog.contentHtml ?? "" }} />
     </div>
   </article>;

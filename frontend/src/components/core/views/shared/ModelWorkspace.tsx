@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Archive, ArchiveRestore, Plus } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
@@ -12,7 +12,8 @@ import { FormView, FormViewSkeleton } from "./FormView";
 import { ListView } from "./ListView";
 import { PaginationControls } from "./PaginationControls";
 import type { ListColumn, ModelRecord } from "./types";
-import type { ModelListField, ModelViewConfig } from "./model-view-config";
+import type { ModelListField, ModelRecordAction, ModelViewConfig } from "./model-view-config";
+import { RecordActions } from "./RecordActions";
 import { useUser } from "@/context/UserContext";
 import { getCrudAccess } from "@/types/access";
 import { slugify } from "@/lib/slug";
@@ -42,6 +43,12 @@ const recordValue = (record: ModelRecord, fieldName: string) =>
 const imageEndpoint = (endpoint: string, id: string) => endpoint.replace("{id}", id);
 const normalizeRecord = (config: ModelViewConfig, record: ModelRecord): ModelRecord => {
   const result = { ...config.form.defaults, ...record } as ModelRecord;
+  const fields = [...config.form.sections.flatMap(s => s.fields), ...(config.form.notebooks ?? []).flatMap(n => n.sections.flatMap(s => s.fields))];
+  for (const field of fields) {
+    const value = result[field.name];
+    if (field.widget === "date" && typeof value === "string") result[field.name] = value.slice(0, 10);
+    if (field.relation && value && typeof value === "object" && "_id" in value) result[field.name] = String(value._id);
+  }
   for (const image of config.images ?? []) {
     result[image.field] = record[image.presentField]
       ? `${process.env.NEXT_PUBLIC_BACKEND_URL ?? ""}${imageEndpoint(image.endpoint, record._id)}?v=${encodeURIComponent(String(record.updatedAt ?? ""))}` : null;
@@ -54,9 +61,14 @@ const renderListValue = (record: ModelRecord, field: ModelListField) => {
   if (field.kind === "image") return value && field.imageEndpoint
     ? <img src={`${process.env.NEXT_PUBLIC_BACKEND_URL ?? ""}${imageEndpoint(field.imageEndpoint, record._id)}?v=${encodeURIComponent(String(record.updatedAt ?? ""))}`} alt="Cover" className="h-10 w-16 rounded-md object-cover" />
     : <span className="text-muted-foreground">—</span>;
-  if (field.kind === "relation") return <span className="text-muted-foreground">{value && typeof value === "object" && "name" in value ? String(value.name) : "No Category"}</span>;
+  if (field.kind === "relation") return <span className="text-muted-foreground">{value && typeof value === "object" && "name" in value ? String(value.name) : "—"}</span>;
   if (field.kind === "date") return <span className="whitespace-nowrap text-muted-foreground">{value ? new Date(String(value)).toLocaleDateString() : "—"}</span>;
   if (field.kind === "status") {
+    if (field.choices) {
+      const choice = field.choices[String(value)];
+      const tone = choice?.tone;
+      return <span className={`inline-flex rounded-full px-2.5 py-1 text-xs font-medium ${tone === "success" ? "bg-emerald-500/10 text-emerald-700 dark:text-emerald-400" : tone === "danger" ? "bg-red-500/10 text-red-700 dark:text-red-400" : "bg-muted text-muted-foreground"}`}>{choice?.label ?? String(value ?? "—")}</span>;
+    }
     const active = Boolean(value);
     return (
       <span className={active
@@ -105,20 +117,23 @@ export function ModelWorkspace({ config, recordId, readonly = false }: ModelWork
   const permissions = getCrudAccess(currentUser?.access, config.accessKey);
   const canRead = permissions.read;
   const canCreate = permissions.create;
-  const canWrite = permissions.write;
-  const canDelete = permissions.delete;
-  const formReadonly = readonly || (recordId === "new" ? !canCreate : !canWrite);
   const { state: searchState, configure, reset } = useViewSearch();
   const debouncedQuery = useDebouncedValue(searchState.query, 300);
   const [records, setRecords] = useState<ModelRecord[]>([]);
   const [total, setTotal] = useState(0);
   const [offset, setOffset] = useState(0);
   const [limit, setLimit] = useState(config.list.pageSize ?? 24);
+  const [order, setOrder] = useState(config.list.order ?? `${config.labelField} asc`);
+  const actionPending = useRef(false);
   const [loading, setLoading] = useState(!recordId);
   const [listError, setListError] = useState<string>();
   const [reloadKey, setReloadKey] = useState(0);
   const [formLoading, setFormLoading] = useState(Boolean(recordId));
   const [formData, setFormData] = useState<ModelRecord | null>(null);
+  const recordAccess = (config.recordPermissionsField ? formData?.[config.recordPermissionsField] : undefined) as { write?: boolean; delete?: boolean } | undefined;
+  const canWrite = permissions.write && (!recordAccess || Boolean(recordAccess.write));
+  const canDelete = permissions.delete && (!recordAccess || Boolean(recordAccess.delete));
+  const formReadonly = readonly || (recordId === "new" ? !canCreate : !canWrite);
   const [originalFormData, setOriginalFormData] = useState<ModelRecord | null>(null);
   const [saving, setSaving] = useState(false);
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
@@ -214,13 +229,14 @@ export function ModelWorkspace({ config, recordId, readonly = false }: ModelWork
         headers: { "Content-Type": "application/json" },
         payload: JSON.stringify({
           fields: apiFields,
-          order: config.list.order ?? `${config.labelField} asc`,
+          order,
           limit,
           offset,
-          domain: filtersToDomain(searchState.filters),
+          domain: [...(config.baseDomain ?? []), ...filtersToDomain(searchState.filters)],
           search: { query: debouncedQuery, fields: searchFields },
           withCount: true,
         }),
+        suppressGlobalError: true,
       });
 
       if (!ignore && response?.ok) {
@@ -239,7 +255,7 @@ export function ModelWorkspace({ config, recordId, readonly = false }: ModelWork
 
     void loadRecords();
     return () => { ignore = true; };
-  }, [accessLoading, apiFields, canRead, config.labelField, config.list.order, config.model, config.search.searchableFields, config.title, debouncedQuery, limit, offset, recordId, reloadKey, searchState.filters, searchState.searchField]);
+  }, [accessLoading, apiFields, canRead, config.baseDomain, config.model, config.search.searchableFields, config.title, order, debouncedQuery, limit, offset, recordId, reloadKey, searchState.filters, searchState.searchField]);
 
   useEffect(() => {
     if (accessLoading) return;
@@ -260,6 +276,8 @@ export function ModelWorkspace({ config, recordId, readonly = false }: ModelWork
     if (recordId === "new") {
       setSlugTouched(false);
       const draft = { _id: "new", ...config.form.defaults } as ModelRecord;
+      if (config.contextDefaults?.companyField) draft[config.contextDefaults.companyField] = currentUser?.access?.currentCompanyId ?? (currentUser?.companyIds.length === 1 ? currentUser.companyIds[0] : null);
+      if (config.contextDefaults?.userField) draft[config.contextDefaults.userField] = currentUser?._id ?? null;
       setFormData(draft);
       setOriginalFormData(draft);
       setFieldErrors({});
@@ -282,6 +300,8 @@ export function ModelWorkspace({ config, recordId, readonly = false }: ModelWork
       });
       if (!ignore && response?.ok) {
         const record = await response.json() as ModelRecord;
+        const destination = config.recordRoutes?.routes[String(record[config.recordRoutes.field])];
+        if (destination && destination !== config.route) { router.replace(`${destination}/${record._id}`); return; }
         const normalized = normalizeRecord(config, record);
         setSlugTouched(true);
         setFormData(normalized);
@@ -312,6 +332,18 @@ export function ModelWorkspace({ config, recordId, readonly = false }: ModelWork
     [config.form.notebooks, config.form.sections],
   );
 
+  const formSections = useMemo(() => config.form.sections.map(section => ({
+    ...section,
+    fields: section.fields.map(field => {
+      if (field.name !== config.slug?.field) return field;
+      const base = config.publicPath?.base.replace(/\/$/, "");
+      return { ...field,
+        ...(base ? { prefix: `${base}/${categoryPathSegment ? `${categoryPathSegment}/` : ""}` } : {}),
+        ...(slugHint ? { helpText: slugHint } : {}),
+      };
+    }),
+  })), [config.form.sections, config.slug, config.publicPath, categoryPathSegment, slugHint]);
+
   const validate = () => {
     if (!formData) return {};
     const errors: Record<string, string> = {};
@@ -329,6 +361,9 @@ export function ModelWorkspace({ config, recordId, readonly = false }: ModelWork
       }
       if (field.widget === "email" && typeof value === "string" && value && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) {
         errors[field.name] = "Please enter a valid email address.";
+      }
+      if (field.widget === "number" && value !== undefined && value !== "" && value !== null && (typeof value !== "number" || !Number.isFinite(value) || (field.min !== undefined && value < field.min) || (field.max !== undefined && value > field.max))) {
+        errors[field.name] = `Enter a number${field.min !== undefined ? ` from ${field.min}` : ""}${field.max !== undefined ? ` to ${field.max}` : ""}.`;
       }
       if (field.widget === "url" && typeof value === "string" && value) {
         try {
@@ -360,6 +395,7 @@ export function ModelWorkspace({ config, recordId, readonly = false }: ModelWork
       const payload: Record<string, unknown> = config.writableFields
         ? Object.fromEntries(config.writableFields.map(field => [field, rawPayload[field]])) : rawPayload;
       const isCreate = formData._id === "new";
+      if (!isCreate) for (const field of config.createOnlyFields ?? []) delete payload[field];
       if (config.slug && isCreate) payload.autoSlug = !slugTouched;
       for (const image of config.images ?? []) { delete payload[image.field]; delete payload[image.presentField]; }
       const response = await apiFetch({
@@ -440,6 +476,25 @@ export function ModelWorkspace({ config, recordId, readonly = false }: ModelWork
     }
   };
 
+  const runAction = async (action: ModelRecordAction, reason: string): Promise<boolean> => {
+    if (!formData || recordId === "new" || dirty || saving || actionPending.current || readonly || !(action.permission === "delete" ? canDelete : canWrite)) return false;
+    actionPending.current = true;
+    setSaving(true);
+    setFormError(undefined);
+    try {
+      const response = await apiFetch({ url: action.endpoint.replace("{id}", formData._id), method: action.method ?? "POST",
+        headers: { "Content-Type": "application/json" }, payload: JSON.stringify({ ...action.payload, ...(action.reasonField ? { [action.reasonField.name]: reason } : {}) }), suppressGlobalError: true });
+      if (!response?.ok) { setFormError(response ? (await parseApiErrors(response)).message ?? "The action failed." : "The server is unavailable."); return true; }
+      if (action.method === "DELETE") { router.push(config.route); return true; }
+      const saved = await response.json() as ModelRecord;
+      const normalized = normalizeRecord(config, saved);
+      setFormData(normalized); setOriginalFormData(normalized); setFieldErrors({});
+      const destination = config.recordRoutes?.routes[String(saved[config.recordRoutes.field])];
+      if (destination && destination !== config.route) router.replace(`${destination}/${saved._id}`);
+      return true;
+    } finally { actionPending.current = false; setSaving(false); }
+  };
+
   if (!accessLoading && (!canRead || (recordId === "new" && !canCreate))) {
     return (
       <main className="mx-auto w-full max-w-4xl p-6">
@@ -463,18 +518,11 @@ export function ModelWorkspace({ config, recordId, readonly = false }: ModelWork
       <main className="mx-auto w-full max-w-7xl p-3 sm:p-5 lg:p-6">
         {formLoading ? <FormViewSkeleton /> : formData ? (
           <FormView
+            key={`${config.model}:${recordId}`}
             data={formData}
             title={recordId === "new" ? `New ${config.singularTitle}` : label}
             description={recordId === "new" ? `Create a ${config.singularTitle.toLowerCase()}` : subtitle}
-            sections={config.form.sections.map(section => ({ ...section, fields: section.fields.map(field => {
-              if (field.name !== config.slug?.field) return field;
-              const base = config.publicPath?.base.replace(/\/$/, "");
-              return {
-                ...field,
-                ...(base ? { prefix: `${base}/${categoryPathSegment ? `${categoryPathSegment}/` : ""}` } : {}),
-                ...(slugHint ? { helpText: slugHint } : {}),
-              };
-            }) }))}
+            sections={formSections}
             notebooks={config.form.notebooks}
             readonly={formReadonly}
             dirty={dirty}
@@ -511,7 +559,9 @@ export function ModelWorkspace({ config, recordId, readonly = false }: ModelWork
               { label: config.title, href: config.route },
               { label: recordId === "new" ? `New ${config.singularTitle}` : label },
             ]}
-            actions={archiveField && recordId !== "new" && ((active && canDelete) || (!active && canWrite)) ? (
+            actions={<>{recordId !== "new" && !readonly && <RecordActions actions={(config.actions ?? []).filter(action =>
+              (action.permission === "delete" ? canDelete : canWrite) && Object.entries(action.when ?? {}).every(([field, expected]) => (Array.isArray(expected) ? expected : [expected]).includes(String(formData[field]))))}
+              disabled={saving} dirty={dirty} onRun={runAction} />}{archiveField && recordId !== "new" && ((active && canDelete) || (!active && canWrite)) ? (
               <Button
                 type="button"
                 variant="ghost"
@@ -531,7 +581,7 @@ export function ModelWorkspace({ config, recordId, readonly = false }: ModelWork
                 {active ? <Archive /> : <ArchiveRestore />}
                 <span className="hidden sm:inline">{active ? "Archive" : "Restore"}</span>
               </Button>
-            ) : undefined}
+            ) : null}</>}
           />
         ) : (
           <div className="rounded-xl border border-dashed bg-card px-6 py-16 text-center">
@@ -550,11 +600,16 @@ export function ModelWorkspace({ config, recordId, readonly = false }: ModelWork
           <h1 className="text-2xl font-semibold tracking-tight">{config.title}</h1>
           <p className="mt-1 text-sm text-muted-foreground">{config.description}</p>
         </div>
+        <div className="flex flex-wrap items-center gap-3">
+        {config.list.sortOptions && <label className="flex items-center gap-2 text-sm text-muted-foreground">Sort
+          <select aria-label="Sort records" className="h-9 rounded-md border bg-background px-2" value={order} onChange={event => { setOrder(event.target.value); setOffset(0); }}>{config.list.sortOptions.map(option => <option key={option.value} value={option.value}>{option.label}</option>)}</select>
+        </label>}
         {canCreate && (
           <Button className="cursor-pointer" onClick={() => router.push(`${config.route}/new`)}>
             <Plus /> New {config.singularTitle}
           </Button>
         )}
+        </div>
       </div>
 
       {loading ? (

@@ -52,7 +52,7 @@ describe('Blog foundation', () => {
     const record = { get: jest.fn(() => publishedAt), set: jest.fn(), save: jest.fn().mockResolvedValue({}) };
     blogs.findById.mockResolvedValue(record);
     await service.update('Blogs', 'id', { title: 'Renamed', published: true });
-    expect(record.set).toHaveBeenCalledWith({ title: 'Renamed', published: true });
+    expect(record.set).toHaveBeenCalledWith({ title: 'Renamed', published: true, contentAttachmentIds: [] });
     await service.update('Blogs', 'id', { slug: 'New URL' });
     expect(record.set).toHaveBeenLastCalledWith({ slug: 'new-url' });
   });
@@ -60,13 +60,26 @@ describe('Blog foundation', () => {
     const record = { get: jest.fn(() => undefined), set: jest.fn(), save: jest.fn().mockResolvedValue({}) };
     blogs.findById.mockResolvedValue(record);
     await service.update('Blogs', 'id', { published: true });
-    expect(record.set).toHaveBeenCalledWith({ published: true, publishedAt: expect.any(Date) });
+    expect(record.set).toHaveBeenCalledWith({ published: true, publishedAt: expect.any(Date), contentAttachmentIds: [] });
   });
   it('sanitizes unsafe HTML and preserves article formatting', () => {
     const html = sanitizeBlogHtml('<h1>Heading</h1><script>alert(1)</script><p onclick="evil()">Safe <a href="javascript:evil()">link</a></p><img src="x" onerror="evil()"><iframe src="https://evil.test"></iframe>');
-    expect(html).toContain('<h2>Heading</h2>');
+    expect(html).toContain('<h1>Heading</h1>');
     expect(html).not.toMatch(/<script|onclick|onerror|javascript:|iframe/);
     expect(blogExcerpt('<p>Readable &amp; useful</p>')).toBe('Readable & useful');
+  });
+  it('derives attachment references on create, replacement, and removal', async () => {
+    const id = String(new Types.ObjectId());
+    blogs.create.mockImplementation(async value => value);
+    await expect(service.create('Blogs', { title: 'Images', contentHtml: `<img src="/editor-media/${id}">` }))
+      .resolves.toMatchObject({ contentAttachmentIds: [id] });
+    const record = { get: jest.fn(), set: jest.fn(), save: jest.fn().mockResolvedValue({}) };
+    blogs.findById.mockResolvedValue(record);
+    await service.update('Blogs', 'id', { contentHtml: `<img src="/editor-media/${id}">` });
+    expect(record.set).toHaveBeenLastCalledWith(expect.objectContaining({ contentAttachmentIds: [id] }));
+    await service.update('Blogs', 'id', { contentHtml: '<p>No image</p>' });
+    expect(record.set).toHaveBeenLastCalledWith({ contentHtml: '<p>No image</p>', contentAttachmentIds: [] });
+    await expect(service.create('Blogs', { title: 'Forged', contentAttachmentIds: [id] })).rejects.toBeInstanceOf(BadRequestException);
   });
   it('serves only published search/detail/images and excludes body HTML from cards', async () => {
     blogs.find.mockReturnValue(query([{ title: 'ERP', contentHtml: '<p>Article excerpt</p>' }]));
