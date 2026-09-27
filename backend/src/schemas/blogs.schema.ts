@@ -13,6 +13,13 @@ export class Blogs {
   @Prop({ type: Buffer, select: false }) coverImage?: Buffer;
   @Prop({ select: false }) coverImageMimeType?: string;
   @Prop({ default: false }) hasCoverImage!: boolean;
+
+  @Prop({ type: [MongooseSchema.Types.ObjectId],
+    ref: 'Attachment',
+    default: [],
+    select: false })
+  contentAttachmentIds!: Types.ObjectId[];
+
   @Prop({ trim: true, maxlength: 200 }) metaTitle?: string;
   @Prop({ trim: true, maxlength: 500 }) metaDescription?: string;
   @Prop({ type: [String], default: [] }) metaKeywords!: string[];
@@ -27,3 +34,4 @@ export class Blogs {
 export const BlogsSchema = SchemaFactory.createForClass(Blogs);
 BlogsSchema.index({ slug: 1 }, { unique: true });
 BlogsSchema.index({ published: 1, publishedAt: -1 });
+BlogsSchema.index({ published: 1, contentAttachmentIds: 1 });

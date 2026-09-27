@@ -9,6 +9,8 @@ import {
   Req,
 } from '@nestjs/common';
 import { CommonService } from './common.service';
+import { CrmService, crmContext, isCrmModel } from '../crm/crm.service';
+import type { CrmRequest } from '../crm/crm.service';
 import { UseGuards } from '@nestjs/common';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { ModelAccessGuard } from '../access/model-access.guard';
@@ -24,12 +26,13 @@ import { RequireModelParamAccess } from '../access/require-model-access.decorato
 @UseGuards(JwtAuthGuard, ModelAccessGuard)
 @Controller('api/:model')
 export class CommonController {
-  constructor(private readonly commonService: CommonService) {}
+  constructor(private readonly commonService: CommonService, private readonly crm: CrmService) {}
   private readonly logger = new Logger(CommonController.name);
 
   @Post()
   @RequireModelParamAccess('model', 'create')
-  async create(@Param('model') model: string, @Body() data: any, @Req() request: { user: { _id: unknown } }) {
+  async create(@Param('model') model: string, @Body() data: any, @Req() request: CrmRequest) {
+    if (isCrmModel(model)) return this.crm.create(model, data, crmContext(request));
     this.logger.log(`api/${model}`);
     return this.commonService.create(model, data, String(request.user._id));
   }
@@ -51,14 +54,17 @@ export class CommonController {
       };
       withCount?: boolean;
     },
+    @Req() request: CrmRequest,
   ) {
+    if (isCrmModel(model)) return this.crm.search(model, body, crmContext(request));
     this.logger.log(`SEARCH api/${model}`);
     return this.commonService.searchRead(model, body);
   }
 
   @Post('read')
   @RequireModelParamAccess('model', 'read')
-  async read(@Param('model') model: string, @Body('id') id: string) {
+  async read(@Param('model') model: string, @Body('id') id: string, @Req() request: CrmRequest) {
+    if (isCrmModel(model)) return this.crm.read(model, id, crmContext(request));
     this.logger.log(`READ api/${model}/${id}`);
     return this.commonService.findById(model, id);
   }
@@ -69,13 +75,16 @@ export class CommonController {
     @Param('model') model: string,
     @Param('id') id: string,
     @Body() data: any,
+    @Req() request: CrmRequest,
   ) {
+    if (isCrmModel(model)) return this.crm.update(model, id, data, crmContext(request));
     return this.commonService.update(model, id, data);
   }
 
   @Delete(':id')
   @RequireModelParamAccess('model', 'delete')
-  async delete(@Param('model') model: string, @Param('id') id: string) {
+  async delete(@Param('model') model: string, @Param('id') id: string, @Req() request: CrmRequest) {
+    if (isCrmModel(model)) return this.crm.remove(model, id, crmContext(request));
     return this.commonService.delete(model, id);
   }
 }

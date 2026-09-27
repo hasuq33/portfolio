@@ -12,6 +12,9 @@ export class CommonService {
   constructor(@InjectConnection() private readonly connection: Connection, private readonly blogsService: BlogsService) {}
 
   private getModel(modelName: string): Model<any> {
+    if (['CrmLead', 'CrmStage', 'CrmTag'].includes(modelName)) {
+      throw new BadRequestException('CRM operations require an authenticated company context.');
+    }
     const model = this.connection.model(modelName);
     if (!model)
       throw new Error(`Model '${modelName}' not found in Mongoose connection.`);

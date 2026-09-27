@@ -5,9 +5,10 @@ import { CommonService } from './common.service';
 import { AuthModule } from '../auth/auth.module';
 import { AccessModule } from '../access/access.module';
 import { BlogsModule } from '../blogs/blogs.module';
+import { CrmModule } from '../crm/crm.module';
 
 @Module({
-  imports: [AuthModule, AccessModule, DatabaseModule, BlogsModule],
+  imports: [AuthModule, AccessModule, DatabaseModule, BlogsModule, CrmModule],
   controllers: [CommonController],
   exports: [CommonService],
   providers: [CommonService],

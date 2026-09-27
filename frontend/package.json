@@ -3,6 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
+    "test:editor": "node --test tests/editor.test.cjs tests/editor-widget.test.cjs tests/content-styles.test.cjs",
     "dev": "next dev --turbopack",
     "build": "next build",
     "start": "next start",
@@ -49,6 +50,7 @@
     "@types/react-dom": "^19",
     "eslint": "^9",
     "eslint-config-next": "^16.1.6",
+    "jsdom": "^30.1.1",
     "shadcn": "^3.5.1",
     "tailwindcss": "^4",
     "typescript": "^5"

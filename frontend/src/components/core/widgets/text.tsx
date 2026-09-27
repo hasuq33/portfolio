@@ -35,9 +35,13 @@ export const TextWidget = ({
               : field.widget === "url" ? "url"
               : field.widget === "tel" ? "tel"
               : field.widget === "date" ? "date"
+              : field.widget === "number" ? "number"
               : "text"
           }
           value={value ?? ""}
+          min={field.min}
+          max={field.max}
+          step={field.step}
           placeholder={field.placeholder}
           required={field.required}
           aria-required={field.required}
@@ -47,7 +51,7 @@ export const TextWidget = ({
           disabled={disabled}
           autoFocus={field.autoFocus}
           autoComplete={isPassword ? "new-password" : field.widget === "email" ? "email" : undefined}
-          onChange={(event) => onChange?.(event.target.value)}
+          onChange={(event) => onChange?.(field.widget === "number" && event.target.value !== "" ? event.target.valueAsNumber : event.target.value)}
           className={cn(
             fieldControlClassName,
             appearance === "form" ? (density === "compact" ? "min-h-9" : "min-h-11") : "min-h-10",

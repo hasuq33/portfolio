@@ -5,7 +5,7 @@ import { Blogs } from '../schemas/blogs.schema';
 import { BlogCategory } from '../schemas/blog-category.schema';
 import { CreateBlogDto, CreateBlogCategoryDto, UpdateBlogDto, UpdateBlogCategoryDto, validateBlogDto } from './blog.dto';
 import { slugify } from './slug';
-import { blogExcerpt, sanitizeBlogHtml } from './blog-html';
+import { blogExcerpt, sanitizeBlogHtml, extractBlogAttachmentIds } from './blog-html';
 
 export interface ImageUpload { buffer: Buffer; mimetype: string; size: number }
 const publicFields = 'title subtitle slug categoryId contentHtml metaTitle metaDescription metaKeywords publishedAt updatedAt hasCoverImage hasOgImage';
@@ -45,6 +45,7 @@ export class BlogsService {
     const payload: Record<string, unknown> = { ...values };
     if (!category) {
       payload.contentHtml = sanitizeBlogHtml((dto as CreateBlogDto).contentHtml ?? '');
+      payload.contentAttachmentIds = extractBlogAttachmentIds(payload.contentHtml as string);
       if (userId) payload.createdBy = new Types.ObjectId(userId);
       if ((dto as CreateBlogDto).published) payload.publishedAt = new Date();
     }
@@ -70,7 +71,15 @@ export class BlogsService {
     if (!category) {
       const blog = dto as UpdateBlogDto;
       await this.checkCategory(blog.categoryId);
-      if (blog.contentHtml !== undefined) payload.contentHtml = sanitizeBlogHtml(blog.contentHtml);
+      if (blog.contentHtml !== undefined) {
+        payload.contentHtml = sanitizeBlogHtml(blog.contentHtml);
+        payload.contentAttachmentIds = extractBlogAttachmentIds(payload.contentHtml as string);
+      } else if (blog.published === true) {
+        // Also repair references for articles saved before attachment tracking existed.
+        payload.contentAttachmentIds = extractBlogAttachmentIds(
+          sanitizeBlogHtml(String(record.get('contentHtml') ?? '')),
+        );
+      }
       if (blog.published && !record.get('publishedAt')) payload.publishedAt = new Date();
     }
     record.set(payload);

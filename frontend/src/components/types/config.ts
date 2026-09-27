@@ -4,6 +4,9 @@ export interface ConfigOption {
 }
 
 export interface ConfigRelation {
+  apiBase?: string;
+  companyField?: string;
+  manageHref?: string;
   model: string;
   labelField: string;
   recordLabel?: string;
@@ -21,6 +24,7 @@ export interface ConfigField {
   label: string;
   widget:
     | 'text'
+    | 'number'
     | 'email'
     | 'password'
     | 'textarea'
@@ -40,6 +44,10 @@ export interface ConfigField {
     | 'access-rights';
 
   placeholder?: string;
+  min?: number;
+  max?: number;
+  step?: number;
+  readonlyAfterCreate?: boolean;
   prefix?: string;
   emptyLabel?: string;
   trueLabel?: string;

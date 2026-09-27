@@ -7,6 +7,7 @@ import {
   useCallback,
   useEffect,
   useId,
+  useMemo,
   useState,
 } from "react";
 import Link from "next/link";
@@ -85,6 +86,8 @@ function FormSection<TRecord extends Record<string, unknown>>({
   density,
   errors,
   onChange,
+  onBusyChange,
+  resetKey,
 }: {
   section: FormSectionConfig;
   data: TRecord;
@@ -93,9 +96,15 @@ function FormSection<TRecord extends Record<string, unknown>>({
   density: FormDensity;
   errors: Record<string, string | undefined>;
   onChange?: (fieldName: string, value: unknown) => void;
+  onBusyChange: (fieldName: string, busy: boolean) => void;
+  resetKey: number;
 }) {
   const hasHeading = Boolean(section.title || section.description);
-  const visibleFields = section.fields.filter((field) => !field.invisible);
+  const companyKey = JSON.stringify(section.fields.map(field => field.relation?.companyField ? data[field.relation.companyField] : null));
+  const visibleFields = useMemo(() => section.fields.filter(field => !field.invisible).map(field => {
+    if (!field.relation?.companyField) return field;
+    return { ...field, relation: { ...field.relation, domain: [...(field.relation.domain ?? []), ["companyId", "=", data[field.relation.companyField] || null] as [string, string, unknown]] } };
+  }), [section.fields, companyKey]);
 
   return (
     <section
@@ -126,12 +135,14 @@ function FormSection<TRecord extends Record<string, unknown>>({
               widget={field.widget}
               field={field}
               value={data[field.name] ?? (field.widget === "switch" ? false : "")}
-              readonly={readonly || Boolean(field.readonly)}
+              readonly={readonly || Boolean(field.readonly) || Boolean(field.readonlyAfterCreate && data._id !== "new")}
               disabled={disabled || Boolean(field.disabled)}
               error={errors[field.name]}
               density={density}
               appearance="form"
               onChange={(value) => onChange?.(field.name, value)}
+              onBusyChange={(busy) => onBusyChange(field.name, busy)}
+              resetKey={resetKey}
             />
           </div>
         ))}
@@ -164,36 +175,54 @@ export function FormView<TRecord extends Record<string, unknown>>({
   const tabIdPrefix = useId();
   const [activeNotebook, setActiveNotebook] = useState(notebooks[0]?.id ?? "");
   const [activeDensity, setActiveDensity] = useState<FormDensity>(density);
+  const [busyFields, setBusyFields] = useState<Set<string>>(() => new Set());
+  const [resetKey, setResetKey] = useState(0);
+  const busy = saving || busyFields.size > 0;
+  const onFieldBusy = useCallback((name: string, pending: boolean) => {
+    setBusyFields(current => {
+      if (current.has(name) === pending) return current;
+      const next = new Set(current);
+      if (pending) next.add(name);
+      else next.delete(name);
+      return next;
+    });
+  }, []);
+  const discard = useCallback(() => {
+    if (busy) return;
+    setResetKey(current => current + 1);
+    onDiscard?.();
+  }, [busy, onDiscard]);
   const activePage = notebooks.find((page) => page.id === activeNotebook) ?? notebooks[0];
 
   useEffect(() => setActiveDensity(density), [density]);
 
   const confirmNavigation = useCallback((action?: () => void) => {
-    if (!action || saving) return;
+    if (!action || busy) return;
     if (dirty && !window.confirm("Discard your unsaved changes and continue?")) return;
     action();
-  }, [dirty, saving]);
+  }, [dirty, busy]);
 
   useEffect(() => {
     const preventUnload = (event: BeforeUnloadEvent) => {
-      if (!dirty || saving) return;
+      if ((!dirty && !busyFields.size) || saving) return;
       event.preventDefault();
       event.returnValue = "";
     };
 
     window.addEventListener("beforeunload", preventUnload);
     return () => window.removeEventListener("beforeunload", preventUnload);
-  }, [dirty, saving]);
+  }, [dirty, saving, busyFields.size]);
 
   useEffect(() => {
     const protectLinkNavigation = (event: MouseEvent) => {
-      if (!dirty) return;
+      if (!dirty && !busy) return;
       const target = event.target;
       if (!(target instanceof Element)) return;
+      if (target.closest('[contenteditable="true"]')) return;
       const link = target.closest("a[href]");
       if (!link || link.getAttribute("href")?.startsWith("#")) return;
 
-      if (saving || !window.confirm("Discard your unsaved changes and continue?")) {
+      if (busy || !window.confirm("Discard your unsaved changes and continue?")) {
         event.preventDefault();
         event.stopPropagation();
       }
@@ -201,35 +230,36 @@ export function FormView<TRecord extends Record<string, unknown>>({
 
     document.addEventListener("click", protectLinkNavigation, true);
     return () => document.removeEventListener("click", protectLinkNavigation, true);
-  }, [dirty, saving]);
+  }, [dirty, busy]);
 
   useEffect(() => {
     const handleKeyboard = (event: KeyboardEvent) => {
       if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === "s") {
         event.preventDefault();
-        if (!readonly && dirty && !saving && onSave) void onSave();
+        if (!readonly && dirty && !busy && onSave) void onSave();
         return;
       }
 
-      if (event.key !== "Escape" || !dirty || saving || !onDiscard) return;
+      if (event.key !== "Escape" || !dirty || busy || !onDiscard) return;
       const focused = document.activeElement;
       const editing = focused instanceof HTMLElement && Boolean(
-        focused.closest("input, textarea, select, [role='combobox'], [role='dialog'], [role='menu']"),
+        focused.closest("input, textarea, select, [contenteditable='true'], [role='combobox'], [role='dialog'], [role='menu']"),
       );
       if (editing) return;
-      if (window.confirm("Discard your unsaved changes?")) onDiscard();
+      if (window.confirm("Discard your unsaved changes?")) discard();
     };
 
     window.addEventListener("keydown", handleKeyboard);
     return () => window.removeEventListener("keydown", handleKeyboard);
-  }, [dirty, onDiscard, onSave, readonly, saving]);
+  }, [dirty, onDiscard, discard, onSave, readonly, busy]);
 
   const submit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    if (!readonly && dirty && !saving && onSave) void onSave();
+    if (!readonly && dirty && !busy && onSave) void onSave();
   };
 
   const handleTabKeyDown = (event: ReactKeyboardEvent<HTMLButtonElement>, index: number) => {
+    if (busy) return;
     let nextIndex: number | null = null;
     if (event.key === "ArrowRight") nextIndex = (index + 1) % notebooks.length;
     if (event.key === "ArrowLeft") nextIndex = (index - 1 + notebooks.length) % notebooks.length;
@@ -247,7 +277,7 @@ export function FormView<TRecord extends Record<string, unknown>>({
     <form
       noValidate
       onSubmit={submit}
-      aria-busy={saving}
+      aria-busy={busy}
       data-density={activeDensity}
       className="space-y-4 pb-3"
     >
@@ -283,7 +313,7 @@ export function FormView<TRecord extends Record<string, unknown>>({
           type="button"
           variant="ghost"
           size="icon"
-          disabled={saving}
+          disabled={busy}
           onClick={() => confirmNavigation(onClose)}
           aria-label="Back to records"
           title="Back to records"
@@ -303,7 +333,7 @@ export function FormView<TRecord extends Record<string, unknown>>({
           {description && <p className="truncate text-xs text-muted-foreground sm:text-sm">{description}</p>}
         </div>
 
-        <div className="ml-auto flex min-w-0 items-center gap-2">
+        <div className="ml-auto flex w-full min-w-0 flex-wrap items-center justify-end gap-2 sm:w-auto">
           {dirty && !saving && (
             <span className="hidden items-center gap-1.5 text-xs font-medium text-amber-600 dark:text-amber-400 sm:inline-flex" aria-live="polite">
               <span className="size-1.5 rounded-full bg-current" /> Unsaved
@@ -329,7 +359,7 @@ export function FormView<TRecord extends Record<string, unknown>>({
                 type="button"
                 variant="ghost"
                 size="icon-sm"
-                disabled={!recordNavigation.hasPrevious || saving}
+                disabled={!recordNavigation.hasPrevious || busy}
                 onClick={() => confirmNavigation(recordNavigation.onPrevious)}
                 title="Previous record"
                 aria-label="Previous record"
@@ -341,7 +371,7 @@ export function FormView<TRecord extends Record<string, unknown>>({
                 type="button"
                 variant="ghost"
                 size="icon-sm"
-                disabled={!recordNavigation.hasNext || saving}
+                disabled={!recordNavigation.hasNext || busy}
                 onClick={() => confirmNavigation(recordNavigation.onNext)}
                 title="Next record"
                 aria-label="Next record"
@@ -358,8 +388,8 @@ export function FormView<TRecord extends Record<string, unknown>>({
               <Button
                 type="button"
                 variant="outline"
-                disabled={!dirty || saving}
-                onClick={onDiscard}
+                disabled={!dirty || busy}
+                onClick={discard}
                 title={dirty ? "Discard changes" : "No changes to discard"}
                 aria-label="Discard changes"
               >
@@ -368,11 +398,11 @@ export function FormView<TRecord extends Record<string, unknown>>({
               <Button
                 type="submit"
                 variant={dirty ? "default" : "outline"}
-                disabled={!dirty || saving}
-                title={dirty ? "Save changes (Ctrl or Cmd + S)" : "No changes to save"}
+                disabled={!dirty || busy}
+                title={busyFields.size ? "Wait for image uploads to finish" : dirty ? "Save changes (Ctrl or Cmd + S)" : "No changes to save"}
               >
                 {saving ? <Loader2 className="animate-spin" /> : <Save />}
-                <span>{saving ? "Saving..." : "Save"}</span>
+                <span>{saving ? "Saving..." : busyFields.size ? "Uploading..." : "Save"}</span>
               </Button>
             </>
           )}
@@ -397,6 +427,8 @@ export function FormView<TRecord extends Record<string, unknown>>({
             density={activeDensity}
             errors={errors}
             onChange={onChange}
+            onBusyChange={onFieldBusy}
+            resetKey={resetKey}
           />
         ))}
       </div>
@@ -413,6 +445,7 @@ export function FormView<TRecord extends Record<string, unknown>>({
                     id={`${tabIdPrefix}-tab-${page.id}`}
                     type="button"
                     role="tab"
+                    disabled={busy}
                     aria-selected={selected}
                     aria-controls={`${tabIdPrefix}-panel-${page.id}`}
                     tabIndex={selected ? 0 : -1}
@@ -459,6 +492,8 @@ export function FormView<TRecord extends Record<string, unknown>>({
                     density={activeDensity}
                     errors={errors}
                     onChange={onChange}
+                    onBusyChange={onFieldBusy}
+                    resetKey={resetKey}
                   />
                 ))}
               </div>

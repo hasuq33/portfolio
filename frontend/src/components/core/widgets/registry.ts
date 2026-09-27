@@ -13,6 +13,7 @@ import { CoverImageWidget } from "./cover-image";
 
 export const WidgetRegistry = {
     text: TextWidget,
+    number: TextWidget,
     email: TextWidget,
     password: TextWidget,
     url: TextWidget,

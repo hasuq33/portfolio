@@ -1,0 +1,457 @@
+/* Shared semantic HTML defaults: editor, read-only preview and published articles.
+   Keep theme classes out of saved HTML; inline author formatting wins the cascade. */
+.rich-content {
+  --content-text: #334155;
+  --content-heading: #111827;
+  --content-muted: #64748b;
+  --content-border: #cbd5e1;
+  --content-surface: #f8fafc;
+  --content-table: #ffffff;
+  --content-header: #f1f5f9;
+  --content-hover: #f8fafc;
+  --content-link: #2563eb;
+  --content-link-hover: #1d4ed8;
+  --content-quote: #93c5fd;
+  --content-code: #9f1239;
+  --content-highlight: #fef08a;
+  --content-highlight-text: #1f2937;
+  color: var(--content-text);
+  font-size: 1rem;
+  line-height: 1.8;
+  overflow-wrap: anywhere;
+  white-space: normal;
+  min-width: 0;
+  max-width: 100%;
+  /* Keep real table layout/colgroups intact for the existing resize engine.
+     Wide tables scroll within the content surface, never the page. */
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+  scrollbar-width: thin;
+  scrollbar-color: var(--content-border) transparent;
+}
+:where(.dark) .rich-content,
+.rich-content:where(.dark) {
+  --content-text: #e5e7eb;
+  --content-heading: #f3f4f6;
+  --content-muted: #9ca3af;
+  --content-border: #475569;
+  --content-surface: #172231;
+  --content-table: #111827;
+  --content-header: #263244;
+  --content-hover: #1e293b;
+  --content-link: #60a5fa;
+  --content-link-hover: #93c5fd;
+  --content-quote: #60a5fa;
+  --content-code: #fda4af;
+}
+.rich-content :where(p, ul, ol, blockquote, pre, figure, table) {
+  margin-block: 1em;
+}
+.rich-content :where(p, h1, h2, h3, h4, h5, h6, li, figcaption) {
+  white-space: pre-wrap;
+}
+.rich-content > :first-child {
+  margin-top: 0;
+}
+.rich-content > :last-child {
+  margin-bottom: 0;
+}
+.rich-content :where(h1, h2, h3, h4, h5, h6) {
+  color: var(--content-heading);
+  font-weight: 700;
+  line-height: 1.3;
+  letter-spacing: -0.015em;
+  margin-block: 1.5em 0.55em;
+  text-wrap: pretty;
+}
+.rich-content :where(h1) {
+  font-size: 2.25em;
+  line-height: 1.2;
+}
+.rich-content :where(h2) {
+  font-size: 1.75em;
+}
+.rich-content :where(h3) {
+  font-size: 1.4em;
+}
+.rich-content :where(h4) {
+  font-size: 1.2em;
+}
+.rich-content :where(h5) {
+  font-size: 1.075em;
+}
+.rich-content :where(h6) {
+  font-size: 1em;
+}
+.rich-content :where(strong, b) {
+  font-weight: 700;
+}
+.rich-content :where(em, i) {
+  font-style: italic;
+}
+.rich-content :where(u) {
+  text-decoration: underline;
+  text-underline-offset: 0.18em;
+}
+.rich-content :where(s, del) {
+  text-decoration: line-through;
+}
+.rich-content :where(small) {
+  font-size: 0.85em;
+  color: var(--content-muted);
+}
+.rich-content :where(ul, ol) {
+  padding-inline-start: 1.6em;
+}
+.rich-content :where(ul) {
+  list-style-type: disc;
+}
+.rich-content :where(ol) {
+  list-style-type: decimal;
+}
+.rich-content :where(ul ul) {
+  list-style-type: circle;
+}
+.rich-content :where(ul ul ul) {
+  list-style-type: square;
+}
+.rich-content :where(li) {
+  padding-inline-start: 0.2em;
+  margin-block: 0.3em;
+}
+.rich-content :where(li)::marker {
+  color: inherit;
+}
+.rich-content :where(li > ul, li > ol) {
+  margin-block: 0.35em;
+}
+.rich-content :where(li > p) {
+  margin-block: 0.35em;
+}
+.rich-content :where(a) {
+  color: var(--content-link);
+  text-decoration: underline;
+  text-decoration-thickness: 0.075em;
+  text-underline-offset: 0.2em;
+}
+.rich-content :where(a:hover) {
+  color: var(--content-link-hover);
+  text-decoration-thickness: 0.12em;
+}
+.rich-content :where(a:focus-visible) {
+  outline: 2px solid var(--content-link);
+  outline-offset: 3px;
+  border-radius: 0.15em;
+}
+.rich-content :where(blockquote) {
+  border-inline-start: 3px solid var(--content-quote);
+  border-radius: 0 var(--radius, 0.625rem) var(--radius, 0.625rem) 0;
+  background: var(--content-surface);
+  padding: 0.75em 1.1em;
+}
+.rich-content :where(blockquote > :first-child) {
+  margin-top: 0;
+}
+.rich-content :where(blockquote > :last-child) {
+  margin-bottom: 0;
+}
+.rich-content :where(code, pre) {
+  font-family:
+    ui-monospace, SFMono-Regular, Consolas, "Liberation Mono", monospace;
+}
+.rich-content :where(code) {
+  color: var(--content-code);
+  background: var(--content-surface);
+  border-radius: 0.3em;
+  padding: 0.15em 0.35em;
+  font-size: 0.875em;
+}
+.rich-content :where(pre) {
+  border: 1px solid var(--content-border);
+  border-radius: var(--radius, 0.625rem);
+  background: var(--content-surface);
+  padding: 1rem 1.15rem;
+  max-width: 100%;
+  overflow-x: auto;
+  white-space: pre;
+  overflow-wrap: normal;
+  tab-size: 2;
+  font-size: 0.875em;
+  line-height: 1.7;
+}
+.rich-content :where(pre code) {
+  color: inherit;
+  background: transparent;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  font-size: inherit;
+  font-family: inherit;
+  white-space: inherit;
+}
+.rich-content :where(table) {
+  --content-columns: 2;
+  width: 100%;
+  min-width: calc(var(--content-columns) * 9rem);
+  table-layout: fixed;
+  border-collapse: separate;
+  border-spacing: 0;
+  border: 1px solid var(--content-border);
+  border-radius: var(--radius, 0.625rem);
+  background: var(--content-table);
+  white-space: normal;
+}
+.rich-content
+  :where(
+    table:has(> :is(thead, tbody, tfoot) > tr > :nth-child(3)),
+    table:has(> tr > :nth-child(3))
+  ) {
+  --content-columns: 3;
+}
+.rich-content
+  :where(
+    table:has(> :is(thead, tbody, tfoot) > tr > :nth-child(4)),
+    table:has(> tr > :nth-child(4))
+  ) {
+  --content-columns: 4;
+}
+.rich-content
+  :where(
+    table:has(> :is(thead, tbody, tfoot) > tr > :nth-child(5)),
+    table:has(> tr > :nth-child(5))
+  ) {
+  --content-columns: 5;
+}
+.rich-content
+  :where(
+    table:has(> :is(thead, tbody, tfoot) > tr > :nth-child(6)),
+    table:has(> tr > :nth-child(6))
+  ) {
+  --content-columns: 6;
+}
+.rich-content
+  :where(
+    table:has(> :is(thead, tbody, tfoot) > tr > :nth-child(7)),
+    table:has(> tr > :nth-child(7))
+  ) {
+  --content-columns: 7;
+}
+.rich-content
+  :where(
+    table:has(> :is(thead, tbody, tfoot) > tr > :nth-child(8)),
+    table:has(> tr > :nth-child(8))
+  ) {
+  --content-columns: 8;
+}
+.rich-content
+  :where(
+    table:has(> :is(thead, tbody, tfoot) > tr > :nth-child(9)),
+    table:has(> tr > :nth-child(9))
+  ) {
+  --content-columns: 9;
+}
+.rich-content
+  :where(
+    table:has(> :is(thead, tbody, tfoot) > tr > :nth-child(10)),
+    table:has(> tr > :nth-child(10))
+  ) {
+  --content-columns: 10;
+}
+.rich-content
+  :where(
+    table:has(> :is(thead, tbody, tfoot) > tr > :nth-child(11)),
+    table:has(> tr > :nth-child(11))
+  ) {
+  --content-columns: 11;
+}
+.rich-content
+  :where(
+    table:has(> :is(thead, tbody, tfoot) > tr > :nth-child(12)),
+    table:has(> tr > :nth-child(12))
+  ) {
+  --content-columns: 12;
+}
+.rich-content :where(th, td) {
+  border: 0;
+  border-inline-end: 1px solid var(--content-border);
+  border-block-end: 1px solid var(--content-border);
+  padding: 0.65em 0.85em;
+  text-align: inherit;
+  vertical-align: top;
+  white-space: pre-wrap;
+  line-height: 1.6;
+}
+.rich-content :where(th:last-child, td:last-child) {
+  border-inline-end: 0;
+}
+.rich-content
+  :where(
+    table > :last-child > tr:last-child > th,
+    table > :last-child > tr:last-child > td,
+    table > tr:last-child > th,
+    table > tr:last-child > td
+  ) {
+  border-block-end: 0;
+}
+.rich-content :where(th) {
+  background: var(--content-header);
+  font-weight: 600;
+}
+.rich-content
+  :where(
+    table > :first-child > tr:first-child > :first-child,
+    table > colgroup + :is(thead, tbody) > tr:first-child > :first-child
+  ) {
+  border-start-start-radius: calc(var(--radius, 0.625rem) - 1px);
+}
+.rich-content
+  :where(
+    table > :first-child > tr:first-child > :last-child,
+    table > colgroup + :is(thead, tbody) > tr:first-child > :last-child
+  ) {
+  border-start-end-radius: calc(var(--radius, 0.625rem) - 1px);
+}
+.rich-content :where(table > :last-child > tr:last-child > :first-child) {
+  border-end-start-radius: calc(var(--radius, 0.625rem) - 1px);
+}
+.rich-content :where(table > :last-child > tr:last-child > :last-child) {
+  border-end-end-radius: calc(var(--radius, 0.625rem) - 1px);
+}
+@media (hover: hover) {
+  .rich-content :where(tbody > tr:hover > td) {
+    background-color: var(--content-hover);
+  }
+}
+.rich-content :where(th, td) > :where(p) {
+  margin: 0;
+}
+.rich-content :where(th, td) > :where(p + p) {
+  margin-top: 0.5em;
+}
+.rich-content :where(hr) {
+  height: 0;
+  border: 0;
+  border-block-start: 1px solid var(--content-border);
+  margin-block: 2em;
+}
+.rich-content :where(img) {
+  display: inline-block;
+  vertical-align: middle;
+  max-width: 100%;
+  height: auto;
+  border-radius: 0.4rem;
+}
+.rich-content :where(figure) {
+  max-width: 100%;
+}
+.rich-content :where(figcaption) {
+  color: var(--content-muted);
+  font-size: 0.875em;
+  line-height: 1.6;
+  margin-top: 0.6em;
+}
+.rich-content :where(img.editor-icon) {
+  display: inline-block;
+  width: 1.25em;
+  height: 1.25em;
+  vertical-align: -0.2em;
+  border-radius: 0;
+}
+.rich-content :where(mark) {
+  color: var(--content-highlight-text);
+  background: var(--content-highlight);
+  border-radius: 0.15em;
+  padding-inline: 0.1em;
+}
+.rich-content :where(span[style*="background-color:"]) {
+  box-decoration-break: clone;
+  -webkit-box-decoration-break: clone;
+  border-radius: 0.15em;
+}
+/* The editor's default highlight palette is pastel. Give it readable default ink
+   in either theme, without changing custom backgrounds or explicit text colors. */
+.rich-content
+  :where(
+    span[style*="background-color: #fef08a" i],
+    span[style*="background-color:#fef08a" i],
+    span[style*="background-color: rgb(254, 240, 138)"],
+    span[style*="background-color: #fed7aa" i],
+    span[style*="background-color:#fed7aa" i],
+    span[style*="background-color: rgb(254, 215, 170)"],
+    span[style*="background-color: #fecaca" i],
+    span[style*="background-color:#fecaca" i],
+    span[style*="background-color: rgb(254, 202, 202)"],
+    span[style*="background-color: #bbf7d0" i],
+    span[style*="background-color:#bbf7d0" i],
+    span[style*="background-color: rgb(187, 247, 208)"],
+    span[style*="background-color: #a5f3fc" i],
+    span[style*="background-color:#a5f3fc" i],
+    span[style*="background-color: rgb(165, 243, 252)"],
+    span[style*="background-color: #bfdbfe" i],
+    span[style*="background-color:#bfdbfe" i],
+    span[style*="background-color: rgb(191, 219, 254)"],
+    span[style*="background-color: #ddd6fe" i],
+    span[style*="background-color:#ddd6fe" i],
+    span[style*="background-color: rgb(221, 214, 254)"],
+    span[style*="background-color: #fbcfe8" i],
+    span[style*="background-color:#fbcfe8" i],
+    span[style*="background-color: rgb(251, 207, 232)"]
+  ):not(
+    :where([style^="color:" i], [style*=";color:" i], [style*="; color:" i])
+  ):not(
+    :where([style^="color:" i], [style*=";color:" i], [style*="; color:" i]) *
+  ) {
+  color: var(--content-highlight-text);
+}
+/* An explicitly colored container also owns the color of its semantic children. */
+.rich-content
+  :where([style^="color:" i], [style*=";color:" i], [style*="; color:" i])
+  :where(h1, h2, h3, h4, h5, h6, a, small, code, figcaption) {
+  color: inherit;
+}
+.rich-content :where([class*="editor-columns-"]) {
+  display: grid;
+  gap: 1.25rem;
+  margin-block: 1rem;
+}
+.rich-content :where([class*="editor-columns-"] > div) {
+  min-width: 0;
+  overflow-x: auto;
+}
+.rich-content :where(.editor-columns-2) {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+.rich-content :where(.editor-columns-3) {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+.rich-content :where(.editor-columns-4) {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+.rich-content :where([class*="editor-banner-"]) {
+  margin-block: 1rem;
+  border: 1px solid var(--content-border);
+  border-inline-start-width: 3px;
+  border-radius: var(--radius, 0.625rem);
+  background: var(--content-surface);
+  padding: 0.75rem 1rem;
+}
+.rich-content :where([class*="editor-banner-"] > p) {
+  margin: 0;
+}
+.rich-content :where(.editor-banner-info) {
+  border-inline-start-color: #3b82f6;
+}
+.rich-content :where(.editor-banner-success) {
+  border-inline-start-color: #22c55e;
+}
+.rich-content :where(.editor-banner-warning) {
+  border-inline-start-color: #f59e0b;
+}
+.rich-content :where(.editor-banner-danger) {
+  border-inline-start-color: #ef4444;
+}
+@media (max-width: 640px) {
+  .rich-content :where([class*="editor-columns-"]) {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
