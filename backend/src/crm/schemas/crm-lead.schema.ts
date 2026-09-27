@@ -1,5 +1,5 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { Types } from 'mongoose';
+import { Schema as MongooseSchema, Types } from 'mongoose';
 
 export enum CrmType {
   Lead = 'lead',
@@ -23,11 +23,11 @@ export class CrmLead {
   @Prop({ enum: CrmStatus, default: CrmStatus.Open }) status!: CrmStatus;
   @Prop({ enum: CrmPriority, default: CrmPriority.Medium })
   priority!: CrmPriority;
-  @Prop({ type: Types.ObjectId, ref: 'Company', required: true })
+  @Prop({ type: MongooseSchema.Types.ObjectId, ref: 'Company', required: true })
   companyId!: Types.ObjectId;
-  @Prop({ type: Types.ObjectId, ref: 'User' }) userId?: Types.ObjectId;
-  @Prop({ type: Types.ObjectId, ref: 'CrmStage' }) stageId?: Types.ObjectId;
-  @Prop({ type: [{ type: Types.ObjectId, ref: 'CrmTag' }], default: [] })
+  @Prop({ type: MongooseSchema.Types.ObjectId, ref: 'User' }) userId?: Types.ObjectId;
+  @Prop({ type: MongooseSchema.Types.ObjectId, ref: 'CrmStage' }) stageId?: Types.ObjectId;
+  @Prop({ type: [{ type: MongooseSchema.Types.ObjectId, ref: 'CrmTag' }], default: [] })
   tagIds!: Types.ObjectId[];
   @Prop({ trim: true, maxlength: 500 }) contactName?: string;
   @Prop({ trim: true, maxlength: 500 }) email?: string;
@@ -50,7 +50,7 @@ export class CrmLead {
   @Prop({ type: Date }) dateDeadline?: Date;
   @Prop({ type: Date }) dateClosed?: Date;
   @Prop({ type: Date }) convertedAt?: Date;
-  @Prop({ type: Types.ObjectId, ref: 'User' }) convertedBy?: Types.ObjectId;
+  @Prop({ type: MongooseSchema.Types.ObjectId, ref: 'User' }) convertedBy?: Types.ObjectId;
 }
 export const CrmLeadSchema = SchemaFactory.createForClass(CrmLead);
 CrmLeadSchema.index({ companyId: 1, type: 1, status: 1, createdAt: -1 });

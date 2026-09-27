@@ -10,6 +10,7 @@ import { AccessRightsWidget } from "./access-rights";
 import { HtmlWidget } from "./html";
 import { ToggleWidget } from "./toggle";
 import { CoverImageWidget } from "./cover-image";
+import { ColorWidget } from "./color";
 
 export const WidgetRegistry = {
     text: TextWidget,
@@ -17,7 +18,7 @@ export const WidgetRegistry = {
     email: TextWidget,
     password: TextWidget,
     url: TextWidget,
-    color: TextWidget,
+    color: ColorWidget,
     textarea: TextAreaWidget,
     html: HtmlWidget,
     switch: BooleanWidget,

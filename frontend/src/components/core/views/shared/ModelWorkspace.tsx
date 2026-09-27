@@ -17,11 +17,17 @@ import { RecordActions } from "./RecordActions";
 import { useUser } from "@/context/UserContext";
 import { getCrudAccess } from "@/types/access";
 import { slugify } from "@/lib/slug";
+import { isHexColor } from "@/lib/color";
+import { relationValueId } from "@/lib/relation-service";
 
 interface ModelWorkspaceProps {
   config: ModelViewConfig;
   recordId?: string;
   readonly?: boolean;
+  embedded?: boolean;
+  initialValues?: Record<string, unknown>;
+  onCreated?: (record: ModelRecord) => void;
+  onCancel?: () => void;
 }
 
 interface SearchResponse {
@@ -46,6 +52,7 @@ const normalizeRecord = (config: ModelViewConfig, record: ModelRecord): ModelRec
   const fields = [...config.form.sections.flatMap(s => s.fields), ...(config.form.notebooks ?? []).flatMap(n => n.sections.flatMap(s => s.fields))];
   for (const field of fields) {
     const value = result[field.name];
+    if (field.widget === "many2many" && Array.isArray(value)) result[field.name] = [...new Set(value.map(item => relationValueId(item, field.relation?.valueField)).filter(Boolean))];
     if (field.widget === "date" && typeof value === "string") result[field.name] = value.slice(0, 10);
     if (field.relation && value && typeof value === "object" && "_id" in value) result[field.name] = String(value._id);
   }
@@ -111,7 +118,7 @@ const parseApiErrors = async (response: Response) => {
   return { fieldErrors, message: responseMessage };
 };
 
-export function ModelWorkspace({ config, recordId, readonly = false }: ModelWorkspaceProps) {
+export function ModelWorkspace({ config, recordId, readonly = false, embedded = false, initialValues, onCreated, onCancel }: ModelWorkspaceProps) {
   const router = useRouter();
   const { user: currentUser, loading: accessLoading } = useUser();
   const permissions = getCrudAccess(currentUser?.access, config.accessKey);
@@ -202,9 +209,10 @@ export function ModelWorkspace({ config, recordId, readonly = false }: ModelWork
   );
 
   useEffect(() => {
+    if (embedded) return;
     configure(config.search);
     return reset;
-  }, [config.search, configure, reset]);
+  }, [config.search, configure, reset, embedded]);
 
   useEffect(() => {
     setOffset(0);
@@ -278,8 +286,9 @@ export function ModelWorkspace({ config, recordId, readonly = false }: ModelWork
       const draft = { _id: "new", ...config.form.defaults } as ModelRecord;
       if (config.contextDefaults?.companyField) draft[config.contextDefaults.companyField] = currentUser?.access?.currentCompanyId ?? (currentUser?.companyIds.length === 1 ? currentUser.companyIds[0] : null);
       if (config.contextDefaults?.userField) draft[config.contextDefaults.userField] = currentUser?._id ?? null;
+      Object.assign(draft, initialValues);
       setFormData(draft);
-      setOriginalFormData(draft);
+      setOriginalFormData(initialValues ? { ...draft, [config.labelField]: "" } : draft);
       setFieldErrors({});
       setFormError(undefined);
       setFormLoading(false);
@@ -314,7 +323,7 @@ export function ModelWorkspace({ config, recordId, readonly = false }: ModelWork
 
     void loadRecord();
     return () => { ignore = true; };
-  }, [accessLoading, canCreate, canRead, config.form.defaults, config.model, recordId]);
+  }, [accessLoading, canCreate, canRead, config.form.defaults, config.model, recordId, initialValues]);
 
   const dirty = useMemo(
     () => Boolean(formData && originalFormData && (
@@ -335,6 +344,7 @@ export function ModelWorkspace({ config, recordId, readonly = false }: ModelWork
   const formSections = useMemo(() => config.form.sections.map(section => ({
     ...section,
     fields: section.fields.map(field => {
+      if (embedded && field.name === config.contextDefaults?.companyField && initialValues?.[field.name]) return { ...field, readonly: true };
       if (field.name !== config.slug?.field) return field;
       const base = config.publicPath?.base.replace(/\/$/, "");
       return { ...field,
@@ -342,7 +352,7 @@ export function ModelWorkspace({ config, recordId, readonly = false }: ModelWork
         ...(slugHint ? { helpText: slugHint } : {}),
       };
     }),
-  })), [config.form.sections, config.slug, config.publicPath, categoryPathSegment, slugHint]);
+  })), [config.form.sections, config.slug, config.publicPath, config.contextDefaults, categoryPathSegment, slugHint, embedded, initialValues]);
 
   const validate = () => {
     if (!formData) return {};
@@ -350,6 +360,7 @@ export function ModelWorkspace({ config, recordId, readonly = false }: ModelWork
     for (const field of configuredFields) {
       if (field.invisible) continue;
       const value = formData[field.name];
+      if (field.widget === "color" && value && !isHexColor(value)) errors[field.name] = "Enter a six-digit HEX color, such as #3b82f6.";
       if (field.required && (
         value === null ||
         value === undefined ||
@@ -439,7 +450,8 @@ export function ModelWorkspace({ config, recordId, readonly = false }: ModelWork
       setSlugTouched(true);
       if (Object.keys(failedImages).length) {
         setFormError("The record was saved, but an image change failed. Your image selection is preserved; save again to retry.");
-      } else if (recordId === "new") router.replace(`${config.route}/${saved._id}`);
+      } else if (onCreated) onCreated(saved);
+      else if (recordId === "new") router.replace(`${config.route}/${saved._id}`);
     } finally {
       setSaving(false);
     }
@@ -501,6 +513,7 @@ export function ModelWorkspace({ config, recordId, readonly = false }: ModelWork
         <div className="rounded-xl border border-dashed bg-card px-6 py-16 text-center">
           <p className="font-medium">Access denied</p>
           <p className="mt-1 text-sm text-muted-foreground">You do not have permission to open {config.title.toLowerCase()}.</p>
+          {onCancel && <Button type="button" variant="outline" className="mt-4" onClick={onCancel}>Close</Button>}
         </div>
       </main>
     );
@@ -553,8 +566,8 @@ export function ModelWorkspace({ config, recordId, readonly = false }: ModelWork
               setFieldErrors({});
               setFormError(undefined);
             }}
-            onClose={() => router.push(config.route)}
-            breadcrumbs={[
+            onClose={() => onCancel ? onCancel() : router.push(config.route)}
+            breadcrumbs={embedded ? [] : [
               ...(config.breadcrumbs ?? [{ label: "Settings", href: "/web/settings" }]),
               { label: config.title, href: config.route },
               { label: recordId === "new" ? `New ${config.singularTitle}` : label },

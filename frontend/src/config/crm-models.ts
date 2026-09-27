@@ -38,12 +38,16 @@ const priority: ConfigField = {
     { label: "High", value: "high" },
   ],
 };
+const crmTagConfig = referenceConfig(false);
 const tags: ConfigField = {
   name: "tagIds",
   label: "Tags",
   widget: "many2many",
+  create: true,
   relation: {
     model: "CrmTag",
+    colorField: "color",
+    formConfig: crmTagConfig,
     labelField: "name",
     recordLabel: "Tag",
     recordLabelPlural: "Tags",
@@ -467,7 +471,7 @@ function referenceConfig(stage: boolean): ModelViewConfig {
           {
             name: "color",
             label: "Color",
-            widget: "text" as const,
+            widget: "color" as const,
             placeholder: "#2563eb",
             helpText: "Optional six-digit hex color.",
           },
@@ -523,5 +527,5 @@ export const crmConfigs: Record<string, ModelViewConfig> = {
   leads: crmLeadConfig,
   opportunities: crmOpportunityConfig,
   stages: referenceConfig(true),
-  tags: referenceConfig(false),
+  tags: crmTagConfig,
 };

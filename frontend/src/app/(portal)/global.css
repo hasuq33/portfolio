@@ -31,3 +31,11 @@ html,main ,  #root {
 .theme_dropwdown_content{
   @apply dark:bg-gray-900/80 bg-white/80 backdrop-blur-lg border border-gray-200 dark:border-gray-700 shadow-lg rounded-lg;
 }
+
+.bg-background{
+  @apply dark:bg-gray-900 bg-white
+}
+
+.text-foreground{
+  @apply dark:text-white text-black
+}

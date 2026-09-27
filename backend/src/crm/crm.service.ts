@@ -332,7 +332,7 @@ export class CrmService {
           },
         })
         .populate({ path: 'stageId', select: 'name', match: scope });
-    else
+    else if (!query.fields.length || query.fields.includes('companyId'))
       result = result.populate({
         path: 'companyId',
         select: 'name',

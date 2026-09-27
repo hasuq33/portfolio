@@ -14,6 +14,7 @@ import type { CrmRequest } from '../crm/crm.service';
 import { UseGuards } from '@nestjs/common';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { ModelAccessGuard } from '../access/model-access.guard';
+import { AccessService } from '../access/access.service';
 import { RequireModelParamAccess } from '../access/require-model-access.decorator';
 
 // Common API Model Sharable which Can be Scallable by Model and Need to find the Data by accessrigght
@@ -26,8 +27,14 @@ import { RequireModelParamAccess } from '../access/require-model-access.decorato
 @UseGuards(JwtAuthGuard, ModelAccessGuard)
 @Controller('api/:model')
 export class CommonController {
-  constructor(private readonly commonService: CommonService, private readonly crm: CrmService) {}
+  constructor(private readonly commonService: CommonService, private readonly crm: CrmService, private readonly access: AccessService) {}
   private readonly logger = new Logger(CommonController.name);
+
+  @Post('access')
+  @RequireModelParamAccess('model', 'read')
+  async modelAccess(@Param('model') model: string, @Req() request: CrmRequest) {
+    return this.access.getModelAccess(request.user, this.access.modelKeyFor(model), crmContext(request).companyId);
+  }
 
   @Post()
   @RequireModelParamAccess('model', 'create')
