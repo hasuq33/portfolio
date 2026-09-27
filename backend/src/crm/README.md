@@ -40,6 +40,16 @@ API:
 
 ## Verification
 
+### Many2many tags and inline creation
+
+- CRM runtime schema references use `mongoose.Schema.Types.ObjectId` (TypeScript properties still use `Types.ObjectId`). Passing the BSON constructor to Nest's schema factory produced `Mixed` paths: company filters sent as strings did not match stored ObjectIds. Integration tests now exercise the exact widget domain and verify BSON storage, not just stringified IDs.
+- Lead and Opportunity `tagIds` share the generic Many2many config. `create: true` is opt-in; `relation.formConfig` reuses the normal Tag form, `colorField` chooses the display color, and the parent company supplies creation defaults. Other Many2many fields remain selection-only.
+- `POST /api/:model/access` reports current server-evaluated CRUD rights, narrowed by `X-Company-Id`. Creation reuses `POST /api/:model` and all existing guards/validation. No separate quick-create endpoint or client-side ACL engine exists.
+- `ModelWorkspace` supports an embedded create mode. It leaves global search and the parent draft untouched; successful save returns the record to the widget. The owning company is locked to the parent context. Missing required metadata or server validation opens this same form with the entered name.
+- The generic Color widget stores six-digit HEX values. Chips use computed contrast text, with theme-token fallbacks for absent/invalid colors. Selected values remain ID arrays, and display records are fetched with minimal projections in batches of at most 200.
+- Tags have an additional named, case-insensitive unique company/name index. The local collection was checked for case-insensitive duplicates before adding it. Before deploying against another database, audit duplicates there and resolve them before building `crm_tag_company_name_ci`; do not automatically delete records. Existing binary index is retained to avoid destructive index replacement.
+- `frontend/tests/many2many.test.cjs` covers real widget interactions and the generic nested form, both theme classes, opt-in/denied creation, IDs, colors, keyboard selection, required-field fallback, and readonly states. These are DOM/behavior tests, not screenshot comparisons.
+
 - `node node_modules/@nestjs/cli/bin/nest.js build`
 - `node node_modules/jest/bin/jest.js --runInBand`
 - Real API tests: set `CRM_TEST_MONGO_URI` to a reachable MongoDB server and run `src/crm/crm.integration.spec.ts`. The suite creates a random `codex_crm_test_<uuid>` database, boots the complete Nest application with real JWT/group guards, and removes only that exact test database afterward. It does not write to the configured application database.

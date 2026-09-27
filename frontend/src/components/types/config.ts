@@ -1,3 +1,5 @@
+import type { ModelViewConfig } from "@/components/core/views/shared/model-view-config";
+
 export interface ConfigOption {
   label: string;
   value: string;
@@ -13,6 +15,10 @@ export interface ConfigRelation {
   recordLabelPlural?: string;
   valueField?: string;
   secondaryField?: string;
+  colorField?: string;
+  formConfig?: ModelViewConfig;
+  creationDefaults?: Record<string, unknown>;
+  contextCompanyId?: string;
   searchFields?: string[];
   domain?: Array<[field: string, operator: string, value: unknown]>;
   order?: string;
@@ -65,6 +71,8 @@ export interface ConfigField {
   imageColorClassName?: string;
   options?: ConfigOption[];
   relation?: ConfigRelation;
+  /** Relation creation is opt-in and still subject to server permissions. */
+  create?: boolean;
   accessModels?: ConfigOption[];
 }
 

@@ -8,6 +8,7 @@ import {
   useEffect,
   useId,
   useMemo,
+  useRef,
   useState,
 } from "react";
 import Link from "next/link";
@@ -103,7 +104,8 @@ function FormSection<TRecord extends Record<string, unknown>>({
   const companyKey = JSON.stringify(section.fields.map(field => field.relation?.companyField ? data[field.relation.companyField] : null));
   const visibleFields = useMemo(() => section.fields.filter(field => !field.invisible).map(field => {
     if (!field.relation?.companyField) return field;
-    return { ...field, relation: { ...field.relation, domain: [...(field.relation.domain ?? []), ["companyId", "=", data[field.relation.companyField] || null] as [string, string, unknown]] } };
+    const companyId = data[field.relation.companyField];
+    return { ...field, relation: { ...field.relation, contextCompanyId: companyId ? String(companyId) : undefined, creationDefaults: { ...field.relation.creationDefaults, companyId: companyId || null }, domain: [...(field.relation.domain ?? []), ["companyId", "=", companyId || null] as [string, string, unknown]] } };
   }), [section.fields, companyKey]);
 
   return (
@@ -173,6 +175,7 @@ export function FormView<TRecord extends Record<string, unknown>>({
   recordNavigation,
 }: FormViewProps<TRecord>) {
   const tabIdPrefix = useId();
+  const formRef = useRef<HTMLFormElement>(null);
   const [activeNotebook, setActiveNotebook] = useState(notebooks[0]?.id ?? "");
   const [activeDensity, setActiveDensity] = useState<FormDensity>(density);
   const [busyFields, setBusyFields] = useState<Set<string>>(() => new Set());
@@ -220,7 +223,7 @@ export function FormView<TRecord extends Record<string, unknown>>({
       if (!(target instanceof Element)) return;
       if (target.closest('[contenteditable="true"]')) return;
       const link = target.closest("a[href]");
-      if (!link || link.getAttribute("href")?.startsWith("#")) return;
+      if (!link || link.getAttribute("target") === "_blank" || link.getAttribute("href")?.startsWith("#")) return;
 
       if (busy || !window.confirm("Discard your unsaved changes and continue?")) {
         event.preventDefault();
@@ -234,6 +237,9 @@ export function FormView<TRecord extends Record<string, unknown>>({
 
   useEffect(() => {
     const handleKeyboard = (event: KeyboardEvent) => {
+      const focusedForm = document.activeElement?.closest("form");
+      if (focusedForm && focusedForm !== formRef.current) return;
+      if (document.activeElement?.closest('[role="dialog"]') && !formRef.current?.contains(document.activeElement)) return;
       if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === "s") {
         event.preventDefault();
         if (!readonly && dirty && !busy && onSave) void onSave();
@@ -255,6 +261,7 @@ export function FormView<TRecord extends Record<string, unknown>>({
 
   const submit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
+    event.stopPropagation();
     if (!readonly && dirty && !busy && onSave) void onSave();
   };
 
@@ -275,6 +282,7 @@ export function FormView<TRecord extends Record<string, unknown>>({
 
   return (
     <form
+      ref={formRef}
       noValidate
       onSubmit={submit}
       aria-busy={busy}

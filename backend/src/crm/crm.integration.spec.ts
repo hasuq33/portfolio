@@ -34,9 +34,9 @@ describeMongo(
         },
         { secret: process.env.JWT_ACCESS_SECRET, expiresIn: '10m' },
       );
-    const post = (url: string, data: unknown, cookie = adminCookie) =>
+    const post = (url: string, data: object, cookie = adminCookie) =>
       request(app.getHttpServer()).post(url).set('Cookie', cookie).send(data);
-    const put = (id: string, data: unknown, cookie = adminCookie) =>
+    const put = (id: string, data: object, cookie = adminCookie) =>
       request(app.getHttpServer())
         .put('/api/CrmLead/' + id)
         .set('Cookie', cookie)
@@ -297,6 +297,49 @@ describeMongo(
         name: 'ERP',
         companyId: String(a._id),
       }).expect(409);
+    });
+    it('casts the exact widget company domain and returns tag display colors', async () => {
+      for (const model of ['CrmLead', 'CrmStage', 'CrmTag']) expect(connection.model(model).schema.path('companyId').instance).toBe('ObjectId');
+      const result = await post('/api/CrmTag/search', {
+        fields: ['_id', 'name', 'color'], domain: [['companyId', '=', String(a._id)]],
+        search: { query: 'ERP', fields: ['name'] }, limit: 100, offset: 0, order: 'name asc',
+      }).set('X-Company-Id', String(a._id)).expect(201);
+      expect(result.body).toHaveLength(1);
+      expect(result.body[0]).toMatchObject({ name: 'ERP', color: '#2563eb' });
+      expect(result.body[0].companyId).toBeUndefined();
+      const denied = await post('/api/CrmTag/search', { domain: [['companyId', '=', String(b._id)]] }).expect(201);
+      expect(denied.body).toEqual([]);
+    });
+    it('persists three tag IDs and removal on both leads and opportunities', async () => {
+      const ids: string[] = [];
+      for (const name of ['First tag', 'Second tag', 'Third tag']) ids.push((await post('/api/CrmTag', { name, companyId: String(a._id) }).expect(201)).body._id);
+      for (const type of ['lead', 'opportunity']) {
+        const created = await post('/api/CrmLead', { name: 'Tag persistence ' + type, type, companyId: String(a._id), tagIds: ids }).expect(201);
+        const read = await post('/api/CrmLead/read', { id: created.body._id }).expect(201);
+        expect(read.body.tagIds).toEqual(ids);
+        const stored = await connection.model('CrmLead').collection.findOne({ _id: new mongoose.Types.ObjectId(created.body._id) });
+        expect(stored!.tagIds.every((id: unknown) => id instanceof mongoose.Types.ObjectId)).toBe(true);
+        await put(created.body._id, { tagIds: [ids[0], ids[2]] }).expect(200);
+        const updated = await post('/api/CrmLead/read', { id: created.body._id }).expect(201);
+        expect(updated.body.tagIds).toEqual([ids[0], ids[2]]);
+        const display = await post('/api/CrmTag/search', { fields: ['_id', 'name', 'color'], domain: [['companyId', '=', String(a._id)], ['_id', 'in', updated.body.tagIds]] }).expect(201);
+        expect(display.body.map((record: any) => record.name).sort()).toEqual(['First tag', 'Third tag']);
+      }
+    });
+    it('protects case-insensitive tag uniqueness and enforces company-specific creation permissions', async () => {
+      const raced = await Promise.all(['Concurrent', 'concurrent'].map(name => post('/api/CrmTag', { name, companyId: String(a._id), color: '' })));
+      expect(raced.map(result => result.status).sort()).toEqual([201, 409]);
+      const colored = await post('/api/CrmTag', { name: 'Color editing', companyId: String(a._id), color: '#3b82f6' }).expect(201);
+      await request(app.getHttpServer()).put('/api/CrmTag/' + colored.body._id).set('Cookie', adminCookie).send({ color: '' }).expect(200);
+      expect((await post('/api/CrmTag/read', { id: colored.body._id }).expect(201)).body.color).toBe('');
+      await post('/api/CrmTag', { name: 'erp', companyId: String(a._id) }).expect(409);
+      await post('/api/CrmTag', { name: 'erp', companyId: String(b._id) }, foreignCookie).expect(201);
+      await post('/api/CrmTag', { name: 'Not allowed', companyId: String(a._id) }, readerCookie).expect(403);
+      await post('/api/CrmTag', { name: 'Invalid color', companyId: String(a._id), color: 'bg-blue-500' }).expect(400);
+      expect((await post('/api/CrmTag/access', {}, readerCookie).set('X-Company-Id', String(a._id)).expect(201)).body.create).toBe(false);
+      expect((await post('/api/CrmTag/access', {}, mixedCookie).set('X-Company-Id', String(a._id)).expect(201)).body.create).toBe(true);
+      expect((await post('/api/CrmTag/access', {}, mixedCookie).set('X-Company-Id', String(b._id)).expect(201)).body.create).toBe(false);
+      await post('/api/CrmTag/access', {}).set('X-Company-Id', String(b._id)).expect(403);
     });
     it('converts in place exactly once under concurrent requests and preserves details', async () => {
       await connection

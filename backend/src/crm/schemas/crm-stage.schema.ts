@@ -1,10 +1,10 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { Types } from 'mongoose';
+import { Schema as MongooseSchema, Types } from 'mongoose';
 
 @Schema({ timestamps: true, collection: 'crm_stages' })
 export class CrmStage {
   @Prop({ required: true, trim: true, maxlength: 100 }) name!: string;
-  @Prop({ type: Types.ObjectId, ref: 'Company', required: true })
+  @Prop({ type: MongooseSchema.Types.ObjectId, ref: 'Company', required: true })
   companyId!: Types.ObjectId;
   @Prop({ default: 10, min: 0 }) sequence!: number;
   @Prop({ default: true }) active!: boolean;
